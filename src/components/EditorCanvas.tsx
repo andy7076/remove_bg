@@ -23,10 +23,12 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
     }
 
     let destroyed = false
+    let initialized = false
+    let appDestroyed = false
     const app = new Application()
     appRef.current = app
 
-    app
+    const initPromise = app
       .init({
         resizeTo: host,
         antialias: true,
@@ -34,8 +36,9 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
         preference: 'webgpu',
       })
       .then(() => {
+        initialized = true
         if (destroyed) {
-          app.destroy(true)
+          destroyPixiApplication(app)
           return
         }
 
@@ -43,13 +46,36 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
         app.canvas.style.width = '100%'
         app.canvas.style.height = '100%'
       })
+      .catch((error) => {
+        if (!destroyed) {
+          console.error('Failed to initialize Pixi application.', error)
+        }
+      })
 
     return () => {
       destroyed = true
       imageSpriteRef.current = null
       maskSpriteRef.current = null
-      app.destroy(true, { children: true, texture: true })
       appRef.current = null
+      if (initialized) {
+        destroyPixiApplication(app)
+        return
+      }
+
+      initPromise.then(() => destroyPixiApplication(app)).catch(() => undefined)
+    }
+
+    function destroyPixiApplication(target: Application) {
+      if (appDestroyed) {
+        return
+      }
+
+      appDestroyed = true
+      try {
+        target.destroy(true, { children: true, texture: true })
+      } catch (error) {
+        console.error('Failed to destroy Pixi application.', error)
+      }
     }
   }, [])
 

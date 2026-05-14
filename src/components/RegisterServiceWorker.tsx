@@ -23,9 +23,16 @@ export function RegisterServiceWorker() {
       return
     }
 
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // The app remains usable without offline caching.
-    })
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        registration.update().catch(() => {
+          // The app remains usable with the currently installed worker.
+        })
+      })
+      .catch(() => {
+        // The app remains usable without offline caching.
+      })
   }, [])
 
   return null

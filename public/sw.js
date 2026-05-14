@@ -1,8 +1,9 @@
-const CACHE_NAME = 'ai-bg-remover-static-v2'
-const RUNTIME_CACHE = 'ai-bg-remover-runtime-v2'
+const CACHE_NAME = 'ai-bg-remover-static-v3'
+const RUNTIME_CACHE = 'ai-bg-remover-runtime-v3'
 const MODEL_CACHE = 'ai-bg-remover-models-v2'
 const STATIC_ASSETS = ['/']
-const CACHEABLE_EXTENSIONS = /\.(?:onnx|wasm|worker\.js|js|css|frag)$/i
+const MODEL_EXTENSIONS = /\.(?:onnx|wasm)$/i
+const STATIC_EXTENSIONS = /\.(?:worker\.js|js|css|frag)$/i
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -14,7 +15,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((key) => ![CACHE_NAME, RUNTIME_CACHE].includes(key)).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => ![CACHE_NAME, RUNTIME_CACHE, MODEL_CACHE].includes(key)).map((key) => caches.delete(key))))
       .then(() => self.clients.claim()),
   )
 })
@@ -27,22 +28,23 @@ self.addEventListener('fetch', (event) => {
   }
 
   const url = new URL(request.url)
-  const isModelOrRuntime =
-    CACHEABLE_EXTENSIONS.test(url.pathname) ||
+  const isSameOrigin = url.origin === self.location.origin
+  const isModel =
+    MODEL_EXTENSIONS.test(url.pathname) ||
     url.hostname === 'cdn.jsdelivr.net' ||
     url.hostname === 'huggingface.co'
-  const isSameOrigin = url.origin === self.location.origin
+  const isSameOriginStatic = isSameOrigin && STATIC_EXTENSIONS.test(url.pathname)
 
-  if (!isSameOrigin && !isModelOrRuntime) {
+  if (!isSameOrigin && !isModel) {
     return
   }
 
-  if (isModelOrRuntime) {
+  if (isModel) {
     event.respondWith(cacheFirst(request, MODEL_CACHE))
     return
   }
 
-  event.respondWith(networkFirst(request, RUNTIME_CACHE))
+  event.respondWith(networkFirst(request, isSameOriginStatic ? CACHE_NAME : RUNTIME_CACHE))
 })
 
 async function cacheFirst(request, cacheName) {

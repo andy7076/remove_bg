@@ -1,0 +1,11 @@
+{
+  "name": "AI Background Remover Editor",
+  "short_name": "AI Cutout",
+  "description": "Remove image backgrounds locally in the browser and export transparent PNG results.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1012",
+  "theme_color": "#35c486",
+  "categories": ["photo", "productivity", "utilities"],
+  "lang": "en"
+}

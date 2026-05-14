@@ -33,6 +33,12 @@ type Copy = {
     webgpu: string
     cache: string
   }
+  theme: {
+    label: string
+    light: string
+    dark: string
+    system: string
+  }
   actions: {
     chooseImage: string
     rerun: string
@@ -72,7 +78,7 @@ type Copy = {
 
 export const MESSAGES: Record<Locale, Copy> = {
   en: {
-    brand: 'AI Background Remover Editor',
+    brand: 'Bg Remover Editor',
     localeName: 'English',
     introTitle: 'Local AI background removal. Your image never leaves the browser.',
     introDescription:
@@ -87,6 +93,12 @@ export const MESSAGES: Record<Locale, Copy> = {
       noUpload: 'No image upload',
       webgpu: 'WebGPU inference',
       cache: 'Local model cache',
+    },
+    theme: {
+      label: 'Theme',
+      light: 'Light mode',
+      dark: 'Dark mode',
+      system: 'Follow system',
     },
     actions: {
       chooseImage: 'Choose image',
@@ -152,7 +164,7 @@ export const MESSAGES: Record<Locale, Copy> = {
     },
   },
   zh: {
-    brand: 'AI Background Remover Editor',
+    brand: 'Bg Remover Editor',
     localeName: '中文',
     introTitle: '本地 AI 抠图，图片不离开浏览器。',
     introDescription:
@@ -167,6 +179,12 @@ export const MESSAGES: Record<Locale, Copy> = {
       noUpload: '不上传原图',
       webgpu: 'WebGPU 推理',
       cache: '模型本地缓存',
+    },
+    theme: {
+      label: '主题',
+      light: '日间模式',
+      dark: '夜间模式',
+      system: '跟随系统',
     },
     actions: {
       chooseImage: '选择图片',

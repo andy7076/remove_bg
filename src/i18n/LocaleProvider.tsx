@@ -1,40 +1,36 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { MESSAGES, type Locale, isLocale } from '@/i18n/messages'
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import type { Locale } from '@/i18n/messages'
+import {
+  LOCALE_STORAGE_KEY,
+  applyLocale,
+  resolveInitialLocale,
+  writeLocalStorage,
+} from '@/settings/appSettings'
 
 type LocaleContextValue = {
   locale: Locale
   setLocale: (locale: Locale) => void
-  ready: boolean
 }
 
-const LOCALE_STORAGE_KEY = 'abg-locale'
 const LocaleContext = createContext<LocaleContextValue | null>(null)
 
 export function LocaleProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [locale, setLocaleState] = useState<Locale>('en')
-  const [ready, setReady] = useState(false)
 
-  useEffect(() => {
-    const resolved = resolveInitialLocale()
-    setLocaleState(resolved)
-    document.documentElement.lang = resolved
-    document.title = MESSAGES[resolved].brand
-    setReady(true)
+  useLayoutEffect(() => {
+    setLocaleState(resolveInitialLocale())
   }, [])
 
   useEffect(() => {
-    if (!ready) {
-      return
-    }
-
-    document.documentElement.lang = locale
-    document.title = MESSAGES[locale].brand
-    localStorage.setItem(LOCALE_STORAGE_KEY, locale)
-  }, [locale, ready])
+    applyLocale(locale)
+    writeLocalStorage(LOCALE_STORAGE_KEY, locale)
+  }, [locale])
 
   const setLocale = useCallback((nextLocale: Locale) => {
+    applyLocale(nextLocale)
+    writeLocalStorage(LOCALE_STORAGE_KEY, nextLocale)
     setLocaleState(nextLocale)
   }, [])
 
@@ -42,9 +38,8 @@ export function LocaleProvider({ children }: Readonly<{ children: React.ReactNod
     () => ({
       locale,
       setLocale,
-      ready,
     }),
-    [locale, setLocale, ready],
+    [locale, setLocale],
   )
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
@@ -58,19 +53,4 @@ export function useLocale() {
   }
 
   return context
-}
-
-function resolveInitialLocale(): Locale {
-  if (typeof window === 'undefined') {
-    return 'en'
-  }
-
-  const stored = localStorage.getItem(LOCALE_STORAGE_KEY)
-  if (isLocale(stored)) {
-    return stored
-  }
-
-  const candidates = [navigator.language, ...(navigator.languages ?? [])].filter(Boolean)
-  const detected = candidates.find((value) => value.toLowerCase().startsWith('zh'))
-  return detected ? 'zh' : 'en'
 }

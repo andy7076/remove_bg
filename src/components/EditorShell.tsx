@@ -17,6 +17,7 @@ import { ChangeEvent, DragEvent, useMemo, useRef, useState } from 'react'
 import { runBirefNet, type BirefNetProgress } from '@/ai/birefnet/runBirefNet'
 import { MODEL_REGISTRY } from '@/ai/modelRegistry'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
+import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { useLocale } from '@/i18n/LocaleProvider'
 import { MESSAGES, type Locale } from '@/i18n/messages'
 import { EditorCanvas } from '@/components/EditorCanvas'
@@ -244,7 +245,10 @@ export function EditorShell() {
             <Sparkles size={18} />
             <span>{copy.brand}</span>
           </div>
-          <LocaleSwitcher />
+          <div className="top-controls">
+            <LocaleSwitcher />
+            <ThemeSwitcher />
+          </div>
         </div>
 
         <div className="intro-copy">
