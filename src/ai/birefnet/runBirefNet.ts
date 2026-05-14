@@ -1,4 +1,5 @@
 import { modelManager, type ModelLoadProgress } from '@/ai/ModelManager'
+import { MODEL_REGISTRY } from '@/ai/modelRegistry'
 import type { MaskBitmap } from '@/types/editor'
 
 type WorkerRequest = {
@@ -49,7 +50,7 @@ export async function runBirefNet(image: ImageBitmap, onProgress?: (progress: Bi
     onProgress?.({ stage: 'model', model: modelProgress })
   })
   const id = crypto.randomUUID()
-  const inputSize = 512
+  const inputSize = MODEL_REGISTRY.birefnet.inputSize
   onProgress?.({ stage: 'inference' })
 
   return new Promise((resolve, reject) => {

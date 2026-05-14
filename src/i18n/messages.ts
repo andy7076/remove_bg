@@ -144,7 +144,7 @@ export const MESSAGES: Record<Locale, Copy> = {
       idle: 'Choose an image. All processing happens locally in your browser.',
       readingImage: 'Reading the image. The file is never uploaded.',
       preparingModel: (model) =>
-        `Preparing ${model}. The first run downloads the model and caches it in IndexedDB.`,
+        `Preparing ${model}. The first run can be slow while the model downloads and is cached locally. Please keep this tab open.`,
       modelCacheHit: 'Model loaded from local IndexedDB cache.',
       modelStored: 'Model cached locally for offline reuse.',
       downloading: (loaded, total) =>
@@ -229,7 +229,7 @@ export const MESSAGES: Record<Locale, Copy> = {
     status: {
       idle: '请选择一张图片，所有处理都会在你的浏览器本地完成。',
       readingImage: '正在读取图片，文件不会上传到服务器。',
-      preparingModel: (model) => `正在准备 ${model}，首次使用会下载并缓存到 IndexedDB。`,
+      preparingModel: (model) => `正在准备 ${model}，首次加载模型会比较慢，下载完成后会缓存到本地，请耐心等待并保持页面打开。`,
       modelCacheHit: '已从本地 IndexedDB 读取模型缓存。',
       modelStored: '模型已保存到本地缓存，后续可直接离线使用。',
       downloading: (loaded, total) =>

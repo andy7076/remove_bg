@@ -15,6 +15,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
   const appRef = useRef<Application | null>(null)
   const imageSpriteRef = useRef<Sprite | null>(null)
   const maskSpriteRef = useRef<Sprite | null>(null)
+  const destroyedRef = useRef(false)
 
   useEffect(() => {
     const host = hostRef.current
@@ -26,6 +27,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
     let initialized = false
     let appDestroyed = false
     const app = new Application()
+    destroyedRef.current = false
     appRef.current = app
 
     const initPromise = app
@@ -54,6 +56,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
 
     return () => {
       destroyed = true
+      destroyedRef.current = true
       imageSpriteRef.current = null
       maskSpriteRef.current = null
       appRef.current = null
@@ -81,7 +84,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
 
   useEffect(() => {
     const app = appRef.current
-    if (!app || !image) {
+    if (destroyedRef.current || !app || !app.stage || !app.renderer || !image) {
       return
     }
 
@@ -93,6 +96,8 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
     if (previousMask) {
       previousMask.destroy({ texture: true })
     }
+    imageSpriteRef.current = null
+    maskSpriteRef.current = null
 
     const imageSprite = new Sprite(Texture.from(image))
     imageSprite.anchor.set(0.5)
@@ -104,13 +109,14 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
   useEffect(() => {
     const app = appRef.current
     const imageSprite = imageSpriteRef.current
-    if (!app || !imageSprite || !mask) {
+    if (destroyedRef.current || !app || !app.stage || !imageSprite || imageSprite.destroyed || !mask) {
       return
     }
 
     const previousMask = maskSpriteRef.current
     if (previousMask) {
       previousMask.destroy({ texture: true })
+      maskSpriteRef.current = null
     }
 
     const maskCanvas = maskToCanvas(mask)
@@ -136,7 +142,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
   function fitSprites() {
     const app = appRef.current
     const imageSprite = imageSpriteRef.current
-    if (!app || !imageSprite) {
+    if (destroyedRef.current || !app || !app.renderer || !imageSprite || imageSprite.destroyed || !imageSprite.texture) {
       return
     }
 
@@ -152,7 +158,7 @@ export function EditorCanvas({ image, mask }: EditorCanvasProps) {
     imageSprite.position.set(x, y)
 
     const maskSprite = maskSpriteRef.current
-    if (maskSprite) {
+    if (maskSprite && !maskSprite.destroyed) {
       maskSprite.scale.set(scale)
       maskSprite.position.set(x, y)
     }

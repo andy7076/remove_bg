@@ -13,6 +13,8 @@ export type ModelLoadProgress = {
   phase: 'cache-hit' | 'download' | 'stored'
   loaded: number
   total: number | null
+  displayLoaded?: number
+  displayTotal?: number | null
 }
 
 const DB_NAME = 'ai-background-remover-models'
@@ -59,7 +61,13 @@ export class ModelManager {
     const cached = await tx<StoredModel | undefined>('readonly', (store) => store.get(key))
 
     if (cached?.buffer.byteLength) {
-      onProgress?.({ phase: 'cache-hit', loaded: cached.buffer.byteLength, total: cached.buffer.byteLength })
+      onProgress?.({
+        phase: 'cache-hit',
+        loaded: cached.buffer.byteLength,
+        total: cached.buffer.byteLength,
+        displayLoaded: cached.buffer.byteLength,
+        displayTotal: cached.buffer.byteLength,
+      })
       return cached.buffer.slice(0)
     }
 
@@ -93,7 +101,13 @@ export class ModelManager {
     }
 
     await tx<IDBValidKey>('readwrite', (store) => store.put(stored))
-    onProgress?.({ phase: 'stored', loaded: buffer.byteLength, total: buffer.byteLength })
+    onProgress?.({
+      phase: 'stored',
+      loaded: buffer.byteLength,
+      total: buffer.byteLength,
+      displayLoaded: buffer.byteLength,
+      displayTotal: buffer.byteLength,
+    })
     return buffer.slice(0)
   }
 
@@ -108,10 +122,17 @@ export const modelManager = new ModelManager()
 async function readResponseBuffer(response: Response, onProgress?: (progress: ModelLoadProgress) => void) {
   const totalHeader = response.headers.get('content-length')
   const total = totalHeader ? Number(totalHeader) : null
+  const displayTotal = normalizedDisplayTotal(total)
 
   if (!response.body) {
     const buffer = await response.arrayBuffer()
-    onProgress?.({ phase: 'download', loaded: buffer.byteLength, total: buffer.byteLength })
+    onProgress?.({
+      phase: 'download',
+      loaded: buffer.byteLength,
+      total: buffer.byteLength,
+      displayLoaded: buffer.byteLength,
+      displayTotal: buffer.byteLength,
+    })
     return buffer
   }
 
@@ -128,7 +149,13 @@ async function readResponseBuffer(response: Response, onProgress?: (progress: Mo
 
     chunks.push(value)
     loaded += value.byteLength
-    onProgress?.({ phase: 'download', loaded, total: Number.isFinite(total) ? total : null })
+    onProgress?.({
+      phase: 'download',
+      loaded,
+      total: Number.isFinite(total) ? total : null,
+      displayLoaded: displayTotal ? Math.min(loaded, displayTotal) : loaded,
+      displayTotal,
+    })
   }
 
   const output = new Uint8Array(loaded)
@@ -140,4 +167,14 @@ async function readResponseBuffer(response: Response, onProgress?: (progress: Mo
   }
 
   return output.buffer
+}
+
+function normalizedDisplayTotal(total: number | null) {
+  if (!total || !Number.isFinite(total)) {
+    return null
+  }
+
+  // Some CDNs/service workers report inflated transfer totals for streamed ONNX responses.
+  // Keep the user-facing progress bounded to the actual model scale instead of showing 400MB+.
+  return total > 160 * 1024 * 1024 ? null : total
 }

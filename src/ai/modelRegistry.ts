@@ -12,7 +12,7 @@ export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
     name: 'birefnet',
     url:
       process.env.NEXT_PUBLIC_BIREFNET_MODEL_URL ??
-      'https://huggingface.co/onnx-community/BiRefNet-ONNX/resolve/main/onnx/model_fp16.onnx',
+      'https://huggingface.co/studioludens/birefnet-lite-512/resolve/main/onnx/model_fp16.onnx',
     version: process.env.NEXT_PUBLIC_BIREFNET_MODEL_VERSION ?? 'latest',
     inputSize: 512,
   },

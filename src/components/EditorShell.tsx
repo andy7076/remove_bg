@@ -163,13 +163,16 @@ export function EditorShell() {
       return
     }
 
-    if (modelProgress.total) {
-      const percent = Math.min(99, Math.round((modelProgress.loaded / modelProgress.total) * 100))
+    const loaded = modelProgress.displayLoaded ?? modelProgress.loaded
+    const total = modelProgress.displayTotal ?? modelProgress.total
+
+    if (total) {
+      const percent = Math.min(99, Math.round((loaded / total) * 100))
       setDownloadProgress(percent)
       setStatusState({
         key: 'downloading',
-        loaded: modelProgress.loaded,
-        total: modelProgress.total,
+        loaded,
+        total,
       })
       return
     }
@@ -177,7 +180,7 @@ export function EditorShell() {
     setDownloadProgress(null)
     setStatusState({
       key: 'downloading',
-      loaded: modelProgress.loaded,
+      loaded,
       total: null,
     })
   }
