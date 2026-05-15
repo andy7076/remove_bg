@@ -329,7 +329,7 @@ export function EditorShell() {
           )}
           {stage === 'processing' && (
             <div className="processing-badge">
-              <LoaderCircle size={16} />
+              <LoaderCircle className="spin" size={16} />
               {copy.preview.processingBadge}
             </div>
           )}

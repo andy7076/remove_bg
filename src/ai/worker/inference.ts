@@ -1,28 +1,39 @@
 import * as ort from 'onnxruntime-web/webgpu'
+import type { ModelNormalization } from '@/ai/modelRegistry'
 
-export type BirefNetInput = {
+export type SegmentationInferenceInput = {
   image: ImageBitmap
   model: ArrayBuffer
+  modelKey?: string
   inputSize: number
+  normalization?: ModelNormalization
 }
 
-let session: ort.InferenceSession | null = null
+export type BirefNetInput = SegmentationInferenceInput
 
-export async function runBirefNetInference({ image, model, inputSize }: BirefNetInput): Promise<{
+let loadedSession: { key: string; session: ort.InferenceSession } | null = null
+
+export async function runSegmentationInference({ image, model, modelKey, inputSize, normalization }: SegmentationInferenceInput): Promise<{
   width: number
   height: number
   mask: Uint8ClampedArray
 }> {
-  if (!session) {
+  const sessionKey = modelKey ?? `${inputSize}:${model.byteLength}`
+
+  if (loadedSession?.key !== sessionKey) {
     ort.env.wasm.numThreads = Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1))
     ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
-    session = await ort.InferenceSession.create(model, {
+    loadedSession = {
+      key: sessionKey,
+      session: await ort.InferenceSession.create(model, {
       executionProviders: ['webgpu'],
       graphOptimizationLevel: 'all',
-    })
+      }),
+    }
   }
 
-  const { tensor, sourceWidth, sourceHeight } = preprocessImage(image, inputSize)
+  const session = loadedSession.session
+  const { tensor, sourceWidth, sourceHeight } = preprocessImage(image, inputSize, normalization)
   const inputName = session.inputNames[0]
   const output = await session.run({ [inputName]: tensor })
   const outputName = session.outputNames[0]
@@ -38,7 +49,9 @@ export async function runBirefNetInference({ image, model, inputSize }: BirefNet
   }
 }
 
-function preprocessImage(image: ImageBitmap, size: number) {
+export const runBirefNetInference = runSegmentationInference
+
+function preprocessImage(image: ImageBitmap, size: number, normalization?: ModelNormalization) {
   const canvas = new OffscreenCanvas(size, size)
   const context = canvas.getContext('2d', { willReadFrequently: true })
 
@@ -52,8 +65,8 @@ function preprocessImage(image: ImageBitmap, size: number) {
   const pixels = context.getImageData(0, 0, size, size).data
   const plane = size * size
   const input = new Float32Array(3 * plane)
-  const mean = [0.485, 0.456, 0.406]
-  const std = [0.229, 0.224, 0.225]
+  const mean = normalization?.mean ?? [0.485, 0.456, 0.406]
+  const std = normalization?.std ?? [0.229, 0.224, 0.225]
 
   for (let i = 0, p = 0; i < pixels.length; i += 4, p += 1) {
     input[p] = pixels[i] / 255 / std[0] - mean[0] / std[0]

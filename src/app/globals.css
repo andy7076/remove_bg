@@ -586,7 +586,10 @@ html[lang='en'] .upload-card {
 }
 
 .spin {
+  display: inline-block;
   animation: spin 900ms linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 @keyframes spin {

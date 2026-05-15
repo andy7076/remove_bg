@@ -1,5 +1,5 @@
 import { modelManager, type ModelLoadProgress } from '@/ai/ModelManager'
-import { MODEL_REGISTRY } from '@/ai/modelRegistry'
+import { MODEL_REGISTRY, type SegmentationModelName } from '@/ai/modelRegistry'
 import type { MaskBitmap } from '@/types/editor'
 
 type WorkerRequest = {
@@ -31,7 +31,7 @@ type WorkerFailure = {
 
 type WorkerResponse = WorkerSuccess | WorkerFailure
 
-export type BirefNetProgress =
+export type SegmentationProgress =
   | {
       stage: 'model'
       model: ModelLoadProgress
@@ -44,18 +44,23 @@ let worker: Worker | null = null
 
 function getWorker() {
   if (!worker) {
-    worker = new Worker(new URL('../worker/birefnet.worker.ts', import.meta.url), { type: 'module' })
+    worker = new Worker(new URL('../worker/segmentation.worker.ts', import.meta.url), { type: 'module' })
   }
 
   return worker
 }
 
-export async function runBirefNet(image: ImageBitmap, onProgress?: (progress: BirefNetProgress) => void): Promise<MaskBitmap> {
-  const descriptor = MODEL_REGISTRY.birefnet
-  const model = await modelManager.load('birefnet', (modelProgress) => {
+export async function runSegmentationModel(
+  modelName: SegmentationModelName,
+  image: ImageBitmap,
+  onProgress?: (progress: SegmentationProgress) => void,
+): Promise<MaskBitmap> {
+  const descriptor = MODEL_REGISTRY[modelName]
+  const model = await modelManager.load(modelName, (modelProgress) => {
     onProgress?.({ stage: 'model', model: modelProgress })
   })
   const id = crypto.randomUUID()
+
   onProgress?.({ stage: 'inference' })
 
   return new Promise((resolve, reject) => {
@@ -92,7 +97,7 @@ export async function runBirefNet(image: ImageBitmap, onProgress?: (progress: Bi
       type: 'segment',
       image,
       model,
-      modelKey: modelManager.keyFor('birefnet'),
+      modelKey: modelManager.keyFor(modelName),
       inputSize: descriptor.inputSize,
       normalization: descriptor.normalization,
     }
