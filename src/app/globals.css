@@ -216,11 +216,13 @@ button[data-variant='primary']:hover:not(:disabled) {
   right: 0;
   width: max-content;
   min-width: 148px;
+  max-width: min(260px, calc(100vw - 24px));
   padding: 6px;
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   background: var(--panel);
   box-shadow: 0 12px 30px var(--shadow);
+  overflow: hidden;
 }
 
 .control-menu button {
@@ -235,6 +237,13 @@ button[data-variant='primary']:hover:not(:disabled) {
   gap: 8px;
   font-size: 13px;
   white-space: nowrap;
+  min-width: 0;
+}
+
+.control-menu button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .control-menu button:hover {
@@ -246,9 +255,16 @@ button[data-variant='primary']:hover:not(:disabled) {
   color: var(--accent);
 }
 
+.theme-menu {
+  width: 196px;
+  min-width: 196px;
+}
+
 .model-select {
   display: grid;
   gap: 8px;
+  position: relative;
+  min-width: 0;
 }
 
 .model-select > span {
@@ -257,26 +273,99 @@ button[data-variant='primary']:hover:not(:disabled) {
   font-weight: 700;
 }
 
-.model-select select {
-  appearance: none;
+.model-select-trigger {
   width: 100%;
   min-height: 40px;
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   background: var(--control-bg);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position:
-    calc(100% - 22px) 17px,
-    calc(100% - 16px) 17px;
-  background-size:
-    6px 6px,
-    6px 6px;
-  background-repeat: no-repeat;
   color: var(--text);
-  padding: 0 42px 0 12px;
-  cursor: pointer;
+  padding: 0 12px;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.model-select-trigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-select-trigger svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.model-select-trigger[aria-expanded='true'] {
+  border-color: var(--button-hover-border);
+  background: var(--control-active);
+}
+
+.model-options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% - 18px);
+  left: 0;
+  width: 100%;
+  max-height: min(280px, calc(100dvh - 160px));
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 12px 30px var(--shadow);
+}
+
+.model-options button {
+  width: 100%;
+  min-height: 50px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.model-options button:hover,
+.model-options button[data-active='true'] {
+  background: var(--control-active);
+}
+
+.model-options button > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
+
+.model-options strong,
+.model-options small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-options strong {
+  font-size: 13px;
+}
+
+.model-options small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.model-options svg {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--accent);
 }
 
 .model-select small {
@@ -936,6 +1025,16 @@ html[lang='en'] .upload-card {
   .top-controls {
     justify-content: flex-start;
     flex-basis: auto;
+  }
+
+  .control-menu {
+    left: 0;
+    right: auto;
+    max-width: calc(100vw - 36px);
+  }
+
+  .model-options {
+    max-height: min(260px, calc(100dvh - 140px));
   }
 
   .intro-copy h1 {

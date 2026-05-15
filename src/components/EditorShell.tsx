@@ -3,7 +3,9 @@
 import {
   AlertCircle,
   Brush,
+  Check,
   CheckCircle2,
+  ChevronDown,
   Cpu,
   Download,
   Eraser,
@@ -85,6 +87,7 @@ export function EditorShell() {
   const { locale } = useLocale()
   const copy = MESSAGES[locale]
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const modelMenuRef = useRef<HTMLDivElement | null>(null)
   const backgroundMenuRef = useRef<HTMLDivElement | null>(null)
   const maskRef = useRef<MaskBitmap | null>(null)
   const pendingHistoryMaskRef = useRef<MaskBitmap | null>(null)
@@ -112,6 +115,7 @@ export function EditorShell() {
   const [fileName, setFileName] = useState('transparent-image')
   const [isDragging, setIsDragging] = useState(false)
   const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('rmbg14')
+  const [modelMenuOpen, setModelMenuOpen] = useState(false)
   const [previewBackground, setPreviewBackground] = useState('transparent')
   const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('preview')
@@ -124,6 +128,10 @@ export function EditorShell() {
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
+      if (!modelMenuRef.current?.contains(event.target as Node)) {
+        setModelMenuOpen(false)
+      }
+
       if (!backgroundMenuRef.current?.contains(event.target as Node)) {
         setBackgroundMenuOpen(false)
       }
@@ -131,6 +139,7 @@ export function EditorShell() {
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
+        setModelMenuOpen(false)
         setBackgroundMenuOpen(false)
       }
     }
@@ -392,6 +401,11 @@ export function EditorShell() {
     setIsDragging(false)
   }
 
+  function handleModelSelect(modelName: SelectableSegmentationModelName) {
+    setSelectedModel(modelName)
+    setModelMenuOpen(false)
+  }
+
   async function handleDrop(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
     setIsDragging(false)
@@ -420,21 +434,49 @@ export function EditorShell() {
           <p>{copy.introDescription}</p>
         </div>
 
-        <label className="model-select">
-          <span>{copy.models.label}</span>
-          <select
-            value={selectedModel}
+        <div className="model-select" ref={modelMenuRef}>
+          <span id="model-select-label">{copy.models.label}</span>
+          <button
+            type="button"
+            className="model-select-trigger"
+            aria-labelledby="model-select-label"
+            aria-expanded={modelMenuOpen}
+            aria-haspopup="listbox"
             disabled={aiState.loading}
-            onChange={(event) => setSelectedModel(event.target.value as SelectableSegmentationModelName)}
+            onClick={() => setModelMenuOpen((current) => !current)}
+            title={formatModelOption(selectedModelCopy)}
           >
-            {SEGMENTATION_MODELS.map((modelName) => (
-              <option value={modelName} key={modelName}>
-                {formatModelOption(copy.models.options[modelName])}
-              </option>
-            ))}
-          </select>
+            <span>{formatModelOption(selectedModelCopy)}</span>
+            <ChevronDown size={18} />
+          </button>
+          {modelMenuOpen && (
+            <div className="model-options" role="listbox" aria-labelledby="model-select-label">
+              {SEGMENTATION_MODELS.map((modelName) => {
+                const option = copy.models.options[modelName]
+                const selected = selectedModel === modelName
+
+                return (
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    data-active={selected}
+                    key={modelName}
+                    onClick={() => handleModelSelect(modelName)}
+                    title={formatModelOption(option)}
+                  >
+                    <span>
+                      <strong>{option.name}</strong>
+                      <small>{option.bestFor}</small>
+                    </span>
+                    {selected && <Check size={15} />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
           <small>{selectedModelCopy.bestFor}</small>
-        </label>
+        </div>
 
         <label
           className="upload-card"

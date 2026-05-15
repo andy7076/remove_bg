@@ -61,7 +61,7 @@ export function ThemeSwitcher() {
         <ActiveIcon size={17} />
       </button>
       {open && (
-        <div className="control-menu" role="menu">
+        <div className="control-menu theme-menu" role="menu">
           {OPTIONS.map((option) => {
             const Icon = option.icon
             const label = copy[option.mode]
