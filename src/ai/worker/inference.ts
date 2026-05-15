@@ -26,8 +26,8 @@ export async function runSegmentationInference({ image, model, modelKey, inputSi
     loadedSession = {
       key: sessionKey,
       session: await ort.InferenceSession.create(model, {
-      executionProviders: ['webgpu'],
-      graphOptimizationLevel: 'all',
+        executionProviders: ['webgpu'],
+        graphOptimizationLevel: 'all',
       }),
     }
   }

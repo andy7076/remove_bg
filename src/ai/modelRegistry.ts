@@ -1,4 +1,5 @@
-export type SegmentationModelName = 'silueta' | 'modnet' | 'birefnet'
+export type SelectableSegmentationModelName = 'silueta' | 'modnet'
+export type SegmentationModelName = SelectableSegmentationModelName | 'birefnet'
 export type ModelName = SegmentationModelName | 'sam2Encoder' | 'sam2Decoder'
 
 export type ModelNormalization = {
@@ -69,11 +70,11 @@ export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
     displayName: 'MODNet',
     url:
       process.env.NEXT_PUBLIC_MODNET_MODEL_URL ??
-      'https://huggingface.co/onnx-community/modnet-webnn/resolve/main/onnx/model_fp16.onnx',
+      'https://huggingface.co/Xenova/modnet/resolve/main/onnx/model_fp16.onnx',
     version: process.env.NEXT_PUBLIC_MODNET_MODEL_VERSION ?? 'latest',
     inputSize: 256,
     normalization: CENTERED_NORMALIZATION,
   },
 }
 
-export const SEGMENTATION_MODELS: readonly SegmentationModelName[] = ['silueta', 'modnet']
+export const SEGMENTATION_MODELS: readonly SelectableSegmentationModelName[] = ['silueta', 'modnet']

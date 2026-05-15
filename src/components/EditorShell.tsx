@@ -14,8 +14,8 @@ import {
   UploadCloud,
 } from 'lucide-react'
 import { ChangeEvent, DragEvent, useMemo, useRef, useState } from 'react'
-import { runBirefNet, type BirefNetProgress } from '@/ai/birefnet/runBirefNet'
-import { MODEL_REGISTRY } from '@/ai/modelRegistry'
+import { MODEL_REGISTRY, SEGMENTATION_MODELS, type SelectableSegmentationModelName } from '@/ai/modelRegistry'
+import { runSegmentationModel, type SegmentationProgress } from '@/ai/segmentation/runSegmentationModel'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { useLocale } from '@/i18n/LocaleProvider'
@@ -63,9 +63,11 @@ export function EditorShell() {
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null)
   const [fileName, setFileName] = useState('transparent-image')
   const [isDragging, setIsDragging] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('silueta')
 
   const canExport = Boolean(originalImage && mask && stage === 'ready' && !aiState.loading)
-  const modelLabel = useMemo(() => MODEL_REGISTRY.birefnet.name, [])
+  const modelLabel = useMemo(() => MODEL_REGISTRY[selectedModel].displayName, [selectedModel])
+  const selectedModelCopy = copy.models.options[selectedModel]
   const statusText = useMemo(() => formatStatus(copy, locale, statusState), [copy, locale, statusState])
   const stepItems = useMemo(() => buildStepItems(copy, completedSteps, activeStep, stage), [copy, completedSteps, activeStep, stage])
   const previewTitle =
@@ -110,7 +112,7 @@ export function EditorShell() {
 
     try {
       const inferenceBitmap = await createImageBitmap(image)
-      const result = await runBirefNet(inferenceBitmap, handleBirefNetProgress)
+      const result = await runSegmentationModel(selectedModel, inferenceBitmap, handleSegmentationProgress)
       markStepDone('inference')
       setActiveStep('preview')
       setStatusState({ key: 'previewGenerating' })
@@ -140,7 +142,7 @@ export function EditorShell() {
     await runSegmentation(originalImage)
   }
 
-  function handleBirefNetProgress(progress: BirefNetProgress) {
+  function handleSegmentationProgress(progress: SegmentationProgress) {
     if (progress.stage === 'inference') {
       markStepDone('model')
       setDownloadProgress(null)
@@ -258,6 +260,22 @@ export function EditorShell() {
           <h1>{copy.introTitle}</h1>
           <p>{copy.introDescription}</p>
         </div>
+
+        <label className="model-select">
+          <span>{copy.models.label}</span>
+          <select
+            value={selectedModel}
+            disabled={aiState.loading}
+            onChange={(event) => setSelectedModel(event.target.value as SelectableSegmentationModelName)}
+          >
+            {SEGMENTATION_MODELS.map((modelName) => (
+              <option value={modelName} key={modelName}>
+                {copy.models.options[modelName].name}
+              </option>
+            ))}
+          </select>
+          <small>{selectedModelCopy.description}</small>
+        </label>
 
         <label
           className="upload-card"

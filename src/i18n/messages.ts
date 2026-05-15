@@ -1,6 +1,6 @@
-export type Locale = 'en' | 'zh'
+import type { SelectableSegmentationModelName } from '@/ai/modelRegistry'
 
-export type ModelFriendlyName = 'BiRefNet'
+export type Locale = 'en' | 'zh'
 
 type StatusFormat = {
   idle: string
@@ -38,6 +38,10 @@ type Copy = {
     light: string
     dark: string
     system: string
+  }
+  models: {
+    label: string
+    options: Record<SelectableSegmentationModelName, { name: string; description: string }>
   }
   actions: {
     chooseImage: string
@@ -100,6 +104,19 @@ export const MESSAGES: Record<Locale, Copy> = {
       dark: 'Dark mode',
       system: 'Follow system',
     },
+    models: {
+      label: 'Model',
+      options: {
+        silueta: {
+          name: 'Silueta',
+          description: 'Fast general cutouts for products, portraits, and simple subjects.',
+        },
+        modnet: {
+          name: 'MODNet',
+          description: 'Portrait matting with better hair and soft edge detail.',
+        },
+      },
+    },
     actions: {
       chooseImage: 'Choose image',
       rerun: 'Re-cutout',
@@ -129,7 +146,7 @@ export const MESSAGES: Record<Locale, Copy> = {
       },
       model: {
         label: 'Load local model',
-        detail: 'Read from IndexedDB or download BiRefNet',
+        detail: 'Read from IndexedDB or download the selected model',
       },
       inference: {
         label: 'AI cutout',
@@ -159,7 +176,7 @@ export const MESSAGES: Record<Locale, Copy> = {
     errors: {
       unsupportedImage: 'Please choose a PNG, JPG, or WebP image.',
       imageDecodeFailed: 'Image decoding failed.',
-      inferenceFailed: 'BiRefNet inference failed.',
+      inferenceFailed: 'Model inference failed.',
       exportFailed: 'PNG export failed.',
     },
   },
@@ -185,6 +202,19 @@ export const MESSAGES: Record<Locale, Copy> = {
       light: '日间模式',
       dark: '夜间模式',
       system: '跟随系统',
+    },
+    models: {
+      label: '模型',
+      options: {
+        silueta: {
+          name: 'Silueta',
+          description: '适合商品、人物和主体清晰的通用快速抠图。',
+        },
+        modnet: {
+          name: 'MODNet',
+          description: '适合人像抠图，头发和柔边细节更稳。',
+        },
+      },
     },
     actions: {
       chooseImage: '选择图片',
@@ -215,7 +245,7 @@ export const MESSAGES: Record<Locale, Copy> = {
       },
       model: {
         label: '准备本地模型',
-        detail: '从 IndexedDB 读取或下载 BiRefNet',
+        detail: '从 IndexedDB 读取或下载所选模型',
       },
       inference: {
         label: 'AI 抠图',
@@ -244,7 +274,7 @@ export const MESSAGES: Record<Locale, Copy> = {
     errors: {
       unsupportedImage: '请选择 PNG、JPG 或 WebP 图片。',
       imageDecodeFailed: '图片解码失败。',
-      inferenceFailed: 'BiRefNet 推理失败。',
+      inferenceFailed: '模型推理失败。',
       exportFailed: 'PNG 导出失败。',
     },
   },
