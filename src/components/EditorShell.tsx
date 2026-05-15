@@ -33,7 +33,7 @@ import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { applyBrush, type BrushStroke } from '@/editor/brush/BrushEngine'
 import { useLocale } from '@/i18n/LocaleProvider'
-import { MESSAGES, type Locale } from '@/i18n/messages'
+import { MESSAGES, type Locale, type ModelOptionCopy } from '@/i18n/messages'
 import { EditorCanvas } from '@/components/EditorCanvas'
 import { useEditorStore } from '@/store/editorStore'
 import type { MaskBitmap } from '@/types/editor'
@@ -111,7 +111,7 @@ export function EditorShell() {
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null)
   const [fileName, setFileName] = useState('transparent-image')
   const [isDragging, setIsDragging] = useState(false)
-  const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('birefnet')
+  const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('rmbg14')
   const [previewBackground, setPreviewBackground] = useState('transparent')
   const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('preview')
@@ -429,11 +429,11 @@ export function EditorShell() {
           >
             {SEGMENTATION_MODELS.map((modelName) => (
               <option value={modelName} key={modelName}>
-                {copy.models.options[modelName].name}
+                {formatModelOption(copy.models.options[modelName])}
               </option>
             ))}
           </select>
-          <small>{selectedModelCopy.description}</small>
+          <small>{selectedModelCopy.bestFor}</small>
         </label>
 
         <label
@@ -764,6 +764,10 @@ function buildStepItems(
       state,
     }
   })
+}
+
+function formatModelOption(option: ModelOptionCopy) {
+  return `${option.name} - ${option.bestFor}`
 }
 
 function formatStatus(copy: (typeof MESSAGES)[Locale], locale: Locale, state: StatusState) {

@@ -1,6 +1,7 @@
-export type SelectableSegmentationModelName = 'birefnet' | 'silueta' | 'modnet'
+export type SelectableSegmentationModelName = 'rmbg14' | 'birefnet' | 'silueta' | 'modnet'
 export type SegmentationModelName = SelectableSegmentationModelName
 export type ModelName = SegmentationModelName | 'sam2Encoder' | 'sam2Decoder'
+export type ModelOutputTransform = 'auto' | 'minmax'
 
 export type ModelNormalization = {
   mean: readonly [number, number, number]
@@ -14,6 +15,7 @@ export type ModelDescriptor = {
   version: string
   inputSize: number
   normalization: ModelNormalization
+  outputTransform?: ModelOutputTransform
 }
 
 const IMAGENET_NORMALIZATION: ModelNormalization = {
@@ -26,7 +28,23 @@ const CENTERED_NORMALIZATION: ModelNormalization = {
   std: [0.5, 0.5, 0.5],
 }
 
+const RMBG_NORMALIZATION: ModelNormalization = {
+  mean: [0.5, 0.5, 0.5],
+  std: [1, 1, 1],
+}
+
 export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
+  rmbg14: {
+    name: 'rmbg14',
+    displayName: 'RMBG-1.4',
+    url:
+      process.env.NEXT_PUBLIC_RMBG_14_MODEL_URL ??
+      'https://huggingface.co/briaai/RMBG-1.4/resolve/main/onnx/model_fp16.onnx',
+    version: process.env.NEXT_PUBLIC_RMBG_14_MODEL_VERSION ?? 'latest',
+    inputSize: 1024,
+    normalization: RMBG_NORMALIZATION,
+    outputTransform: 'minmax',
+  },
   silueta: {
     name: 'silueta',
     displayName: 'Silueta',
@@ -77,4 +95,4 @@ export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
   },
 }
 
-export const SEGMENTATION_MODELS: readonly SelectableSegmentationModelName[] = ['birefnet', 'silueta', 'modnet']
+export const SEGMENTATION_MODELS: readonly SelectableSegmentationModelName[] = ['rmbg14', 'birefnet', 'silueta', 'modnet']

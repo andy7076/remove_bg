@@ -2,6 +2,11 @@ import type { SelectableSegmentationModelName } from '@/ai/modelRegistry'
 
 export type Locale = 'en' | 'zh'
 
+export type ModelOptionCopy = {
+  name: string
+  bestFor: string
+}
+
 type StatusFormat = {
   idle: string
   readingImage: string
@@ -41,7 +46,7 @@ type Copy = {
   }
   models: {
     label: string
-    options: Record<SelectableSegmentationModelName, { name: string; description: string }>
+    options: Record<SelectableSegmentationModelName, ModelOptionCopy>
   }
   edit: {
     label: string
@@ -126,17 +131,21 @@ export const MESSAGES: Record<Locale, Copy> = {
     models: {
       label: 'Model',
       options: {
+        rmbg14: {
+          name: 'RMBG-1.4',
+          bestFor: 'General cutouts and batch image processing.',
+        },
         birefnet: {
           name: 'BiRefNet_lite',
-          description: 'Balanced general cutouts for people, products, animals, and busy edges.',
+          bestFor: 'Lightweight general cutouts and real-time processing.',
         },
         silueta: {
           name: 'Silueta',
-          description: 'Fast general cutouts for products, portraits, and simple subjects.',
+          bestFor: 'Fast person segmentation and real-time cutouts.',
         },
         modnet: {
           name: 'MODNet',
-          description: 'Portrait matting with better hair and soft edge detail.',
+          bestFor: 'Real-time portrait cutouts and video background replacement.',
         },
       },
     },
@@ -248,17 +257,21 @@ export const MESSAGES: Record<Locale, Copy> = {
     models: {
       label: '模型',
       options: {
+        rmbg14: {
+          name: 'RMBG-1.4',
+          bestFor: '通用抠图、批量图片处理。',
+        },
         birefnet: {
           name: 'BiRefNet_lite',
-          description: '适合人物、商品、动物和复杂边缘的通用抠图。',
+          bestFor: '轻量级通用抠图、实时处理。',
         },
         silueta: {
           name: 'Silueta',
-          description: '适合商品、人物和主体清晰的通用快速抠图。',
+          bestFor: '快速人物分割、实时抠图。',
         },
         modnet: {
           name: 'MODNet',
-          description: '适合人像抠图，头发和柔边细节更稳。',
+          bestFor: '实时人像抠图、视频背景替换。',
         },
       },
     },

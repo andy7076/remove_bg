@@ -1,5 +1,5 @@
 import { modelManager, type ModelLoadProgress } from '@/ai/ModelManager'
-import { MODEL_REGISTRY, type SegmentationModelName } from '@/ai/modelRegistry'
+import { MODEL_REGISTRY, type ModelOutputTransform, type SegmentationModelName } from '@/ai/modelRegistry'
 import type { MaskBitmap } from '@/types/editor'
 
 type WorkerRequest = {
@@ -13,6 +13,7 @@ type WorkerRequest = {
     mean: readonly [number, number, number]
     std: readonly [number, number, number]
   }
+  outputTransform?: ModelOutputTransform
 }
 
 type WorkerSuccess = {
@@ -100,6 +101,7 @@ export async function runSegmentationModel(
       modelKey: modelManager.keyFor(modelName),
       inputSize: descriptor.inputSize,
       normalization: descriptor.normalization,
+      outputTransform: descriptor.outputTransform,
     }
     activeWorker.addEventListener('message', handleMessage)
     activeWorker.addEventListener('error', handleError)

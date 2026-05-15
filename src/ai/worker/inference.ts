@@ -1,5 +1,5 @@
 import * as ort from 'onnxruntime-web/webgpu'
-import type { ModelNormalization } from '@/ai/modelRegistry'
+import type { ModelNormalization, ModelOutputTransform } from '@/ai/modelRegistry'
 
 export type SegmentationInferenceInput = {
   image: ImageBitmap
@@ -7,13 +7,21 @@ export type SegmentationInferenceInput = {
   modelKey?: string
   inputSize: number
   normalization?: ModelNormalization
+  outputTransform?: ModelOutputTransform
 }
 
 export type BirefNetInput = SegmentationInferenceInput
 
 let loadedSession: { key: string; session: ort.InferenceSession } | null = null
 
-export async function runSegmentationInference({ image, model, modelKey, inputSize, normalization }: SegmentationInferenceInput): Promise<{
+export async function runSegmentationInference({
+  image,
+  model,
+  modelKey,
+  inputSize,
+  normalization,
+  outputTransform = 'auto',
+}: SegmentationInferenceInput): Promise<{
   width: number
   height: number
   mask: Uint8ClampedArray
@@ -38,7 +46,7 @@ export async function runSegmentationInference({ image, model, modelKey, inputSi
   const output = await session.run({ [inputName]: tensor })
   const outputName = session.outputNames[0]
   const result = output[outputName]
-  const matte = tensorToMask(result.data, result.dims, inputSize, sourceWidth, sourceHeight)
+  const matte = tensorToMask(result.data, result.dims, inputSize, sourceWidth, sourceHeight, outputTransform)
 
   image.close()
 
@@ -81,7 +89,14 @@ function preprocessImage(image: ImageBitmap, size: number, normalization?: Model
   }
 }
 
-function tensorToMask(data: ort.Tensor['data'], dims: readonly number[], fallbackSize: number, width: number, height: number) {
+function tensorToMask(
+  data: ort.Tensor['data'],
+  dims: readonly number[],
+  fallbackSize: number,
+  width: number,
+  height: number,
+  outputTransform: ModelOutputTransform,
+) {
   const values = numericData(data)
   const outputWidth = dims.length >= 2 ? dims[dims.length - 1] : fallbackSize
   const outputHeight = dims.length >= 3 ? dims[dims.length - 2] : fallbackSize
@@ -97,10 +112,18 @@ function tensorToMask(data: ort.Tensor['data'], dims: readonly number[], fallbac
   }
 
   const isProbability = min >= 0 && max <= 1
+  const range = max - min
 
   for (let i = 0, p = 0; i < count; i += 1, p += 4) {
     const value = values[i]
-    const probability = isProbability ? value : sigmoid(value)
+    const probability =
+      outputTransform === 'minmax'
+        ? range > 0
+          ? (value - min) / range
+          : 0
+        : isProbability
+          ? value
+          : sigmoid(value)
     const channel = Math.max(0, Math.min(255, Math.round(probability * 255)))
     alpha[p] = channel
     alpha[p + 1] = channel
@@ -142,7 +165,7 @@ function sigmoid(value: number) {
 
 function numericData(data: ort.Tensor['data']): ArrayLike<number> {
   if (typeof data[0] !== 'number') {
-    throw new Error('BiRefNet returned a non-numeric tensor.')
+    throw new Error('Segmentation model returned a non-numeric tensor.')
   }
 
   return data as ArrayLike<number>
