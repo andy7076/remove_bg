@@ -43,6 +43,25 @@ type Copy = {
     label: string
     options: Record<SelectableSegmentationModelName, { name: string; description: string }>
   }
+  edit: {
+    label: string
+    viewMode: string
+    previewMode: string
+    editMode: string
+    livePreview: string
+    restore: string
+    erase: string
+    pan: string
+    background: string
+    backgroundOption: (value: string) => string
+    customBackground: string
+    zoomIn: string
+    zoomOut: string
+    resetView: string
+    undo: string
+    redo: string
+    brushSize: string
+  }
   actions: {
     chooseImage: string
     rerun: string
@@ -116,6 +135,25 @@ export const MESSAGES: Record<Locale, Copy> = {
           description: 'Portrait matting with better hair and soft edge detail.',
         },
       },
+    },
+    edit: {
+      label: 'Edit mask',
+      viewMode: 'View mode',
+      previewMode: 'Preview',
+      editMode: 'Edit',
+      livePreview: 'Live preview',
+      restore: 'Add',
+      erase: 'Remove',
+      pan: 'Drag',
+      background: 'Preview background',
+      backgroundOption: (value) => (value === 'transparent' ? 'Transparent background' : `Background ${value}`),
+      customBackground: 'Custom',
+      zoomIn: 'Zoom in',
+      zoomOut: 'Zoom out',
+      resetView: 'Reset view',
+      undo: 'Undo',
+      redo: 'Redo',
+      brushSize: 'Brush',
     },
     actions: {
       chooseImage: 'Choose image',
@@ -215,6 +253,25 @@ export const MESSAGES: Record<Locale, Copy> = {
           description: '适合人像抠图，头发和柔边细节更稳。',
         },
       },
+    },
+    edit: {
+      label: '编辑蒙版',
+      viewMode: '视图模式',
+      previewMode: '预览',
+      editMode: '编辑',
+      livePreview: '同步预览',
+      restore: '添加',
+      erase: '删除',
+      pan: '拖拽',
+      background: '预览背景',
+      backgroundOption: (value) => (value === 'transparent' ? '透明棋盘背景' : `背景色 ${value}`),
+      customBackground: '自定义',
+      zoomIn: '放大',
+      zoomOut: '缩小',
+      resetView: '重置视图',
+      undo: '撤回',
+      redo: '前进',
+      brushSize: '笔刷',
     },
     actions: {
       chooseImage: '选择图片',

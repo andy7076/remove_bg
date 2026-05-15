@@ -1,6 +1,6 @@
 import type { MaskBitmap } from '@/types/editor'
 
-export async function exportTransparentPng(image: ImageBitmap, mask: MaskBitmap): Promise<Blob> {
+export async function exportTransparentPng(image: ImageBitmap, mask: MaskBitmap, background = 'transparent'): Promise<Blob> {
   if (image.width !== mask.width || image.height !== mask.height) {
     throw new Error('Image and mask dimensions do not match.')
   }
@@ -13,11 +13,31 @@ export async function exportTransparentPng(image: ImageBitmap, mask: MaskBitmap)
   }
 
   context.clearRect(0, 0, image.width, image.height)
+
+  if (background !== 'transparent') {
+    context.fillStyle = background
+    context.fillRect(0, 0, image.width, image.height)
+  }
+
+  const cutout = createCutoutCanvas(image, mask)
+  context.drawImage(cutout, 0, 0)
+  return canvas.convertToBlob({ type: 'image/png' })
+}
+
+function createCutoutCanvas(image: ImageBitmap, mask: MaskBitmap) {
+  const canvas = new OffscreenCanvas(image.width, image.height)
+  const context = canvas.getContext('2d')
+
+  if (!context) {
+    throw new Error('OffscreenCanvas cutout context is unavailable.')
+  }
+
+  context.clearRect(0, 0, image.width, image.height)
   context.drawImage(image, 0, 0)
   context.globalCompositeOperation = 'destination-in'
   context.drawImage(createMaskCanvas(mask), 0, 0)
   context.globalCompositeOperation = 'source-over'
-  return canvas.convertToBlob({ type: 'image/png' })
+  return canvas
 }
 
 function createMaskCanvas(mask: MaskBitmap) {
