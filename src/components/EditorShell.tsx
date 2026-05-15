@@ -153,6 +153,9 @@ export function EditorShell() {
   }, [])
 
   const canExport = Boolean(originalImage && mask && stage === 'ready' && !aiState.loading)
+  const canEditMask = Boolean(viewMode === 'edit' && originalImage && mask && stage !== 'processing' && !aiState.loading)
+  const canPanCanvas = Boolean(originalImage && stage !== 'processing' && !aiState.loading)
+  const brushControlDisabled = !canEditMask || selectedTool === 'pan'
   const modelLabel = useMemo(() => MODEL_REGISTRY[selectedModel].displayName, [selectedModel])
   const selectedModelCopy = copy.models.options[selectedModel]
   const statusText = useMemo(() => formatStatus(copy, locale, statusState), [copy, locale, statusState])
@@ -574,7 +577,7 @@ export function EditorShell() {
                   aria-label={label}
                   aria-pressed={selectedTool === tool.id}
                   data-active={selectedTool === tool.id}
-                  disabled={viewMode !== 'edit' || !originalImage || !mask || aiState.loading}
+                  disabled={tool.id === 'pan' ? !canPanCanvas : !canEditMask}
                   key={tool.id}
                   onClick={() => setSelectedTool(tool.id)}
                   title={label}
@@ -592,7 +595,7 @@ export function EditorShell() {
               min="6"
               max="96"
               value={brushSize}
-              disabled={viewMode !== 'edit' || !originalImage || !mask || aiState.loading || selectedTool === 'pan'}
+              disabled={brushControlDisabled}
               style={{ '--brush-fill': `${((brushSize - 6) / 90) * 100}%` } as CSSProperties}
               onChange={(event) => setBrushSize(Number(event.target.value))}
             />
@@ -701,8 +704,9 @@ export function EditorShell() {
             mask={mask}
             brushHardness={brushHardness}
             brushSize={brushSize}
-            editable={Boolean(viewMode === 'edit' && originalImage && mask && stage !== 'processing')}
+            editable={canEditMask}
             offset={offset}
+            pannable={canPanCanvas && selectedTool === 'pan'}
             previewBackground={previewBackground}
             tool={selectedTool}
             zoom={zoom}

@@ -651,14 +651,25 @@ html[lang='en'] .upload-card {
   height: 18px;
   border-radius: 999px;
   --brush-fill: 33%;
+  --brush-active: var(--accent);
   --brush-track: color-mix(in srgb, var(--muted) 22%, var(--panel-strong));
   background: transparent;
+}
+
+.brush-control:has(input:disabled) {
+  color: color-mix(in srgb, var(--muted) 64%, var(--panel-strong));
+}
+
+.brush-control input[type='range']:disabled {
+  --brush-active: color-mix(in srgb, var(--muted) 48%, var(--panel-strong));
+  --brush-track: color-mix(in srgb, var(--muted) 14%, var(--panel-strong));
+  cursor: not-allowed;
 }
 
 .brush-control input[type='range']::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(to right, var(--accent) 0 var(--brush-fill), var(--brush-track) var(--brush-fill) 100%);
+  background: linear-gradient(to right, var(--brush-active) 0 var(--brush-fill), var(--brush-track) var(--brush-fill) 100%);
   border: 1px solid color-mix(in srgb, var(--muted) 24%, transparent);
 }
 
@@ -669,8 +680,17 @@ html[lang='en'] .upload-card {
   margin-top: -6px;
   border: 2px solid var(--panel);
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--brush-active);
   box-shadow: 0 1px 3px var(--shadow);
+}
+
+.brush-control input[type='range']:disabled::-webkit-slider-runnable-track {
+  border-color: color-mix(in srgb, var(--muted) 16%, transparent);
+}
+
+.brush-control input[type='range']:disabled::-webkit-slider-thumb {
+  border-color: color-mix(in srgb, var(--panel) 78%, var(--muted));
+  box-shadow: none;
 }
 
 .brush-control input[type='range']::-moz-range-track {
@@ -683,7 +703,7 @@ html[lang='en'] .upload-card {
 .brush-control input[type='range']::-moz-range-progress {
   height: 6px;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--brush-active);
 }
 
 .brush-control input[type='range']::-moz-range-thumb {
@@ -691,8 +711,17 @@ html[lang='en'] .upload-card {
   height: 14px;
   border: 2px solid var(--panel);
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--brush-active);
   box-shadow: 0 1px 3px var(--shadow);
+}
+
+.brush-control input[type='range']:disabled::-moz-range-track {
+  border-color: color-mix(in srgb, var(--muted) 16%, transparent);
+}
+
+.brush-control input[type='range']:disabled::-moz-range-thumb {
+  border-color: color-mix(in srgb, var(--panel) 78%, var(--muted));
+  box-shadow: none;
 }
 
 .background-picker {

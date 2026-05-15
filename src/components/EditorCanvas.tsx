@@ -12,6 +12,7 @@ type EditorCanvasProps = {
   brushHardness?: number
   brushSize?: number
   editable?: boolean
+  pannable?: boolean
   previewBackground?: string
   offset?: Point
   tool?: EditorTool
@@ -28,6 +29,7 @@ export function EditorCanvas({
   brushHardness = 0.85,
   brushSize = 36,
   editable = false,
+  pannable = false,
   previewBackground = 'transparent',
   offset = { x: 0, y: 0 },
   tool = 'erase',
@@ -443,7 +445,7 @@ export function EditorCanvas({
   }
 
   function handlePointerDown(event: PointerEvent<HTMLCanvasElement>) {
-    if (!editable || !image || !mask) {
+    if (!image || (tool !== 'pan' && (!editable || !mask)) || (tool === 'pan' && !pannable)) {
       return
     }
 
@@ -466,7 +468,7 @@ export function EditorCanvas({
   }
 
   function handlePointerMove(event: PointerEvent<HTMLCanvasElement>) {
-    if (!editable || !image) {
+    if (!image || (!editable && !(tool === 'pan' && pannable))) {
       return
     }
 
