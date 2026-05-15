@@ -111,7 +111,7 @@ export function EditorShell() {
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null)
   const [fileName, setFileName] = useState('transparent-image')
   const [isDragging, setIsDragging] = useState(false)
-  const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('silueta')
+  const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('birefnet')
   const [previewBackground, setPreviewBackground] = useState('transparent')
   const [backgroundMenuOpen, setBackgroundMenuOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('preview')

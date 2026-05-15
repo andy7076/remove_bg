@@ -126,6 +126,10 @@ export const MESSAGES: Record<Locale, Copy> = {
     models: {
       label: 'Model',
       options: {
+        birefnet: {
+          name: 'BiRefNet_lite',
+          description: 'Balanced general cutouts for people, products, animals, and busy edges.',
+        },
         silueta: {
           name: 'Silueta',
           description: 'Fast general cutouts for products, portraits, and simple subjects.',
@@ -244,6 +248,10 @@ export const MESSAGES: Record<Locale, Copy> = {
     models: {
       label: '模型',
       options: {
+        birefnet: {
+          name: 'BiRefNet_lite',
+          description: '适合人物、商品、动物和复杂边缘的通用抠图。',
+        },
         silueta: {
           name: 'Silueta',
           description: '适合商品、人物和主体清晰的通用快速抠图。',

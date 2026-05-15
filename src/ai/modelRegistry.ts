@@ -1,5 +1,5 @@
-export type SelectableSegmentationModelName = 'silueta' | 'modnet'
-export type SegmentationModelName = SelectableSegmentationModelName | 'birefnet'
+export type SelectableSegmentationModelName = 'birefnet' | 'silueta' | 'modnet'
+export type SegmentationModelName = SelectableSegmentationModelName
 export type ModelName = SegmentationModelName | 'sam2Encoder' | 'sam2Decoder'
 
 export type ModelNormalization = {
@@ -37,7 +37,7 @@ export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
   },
   birefnet: {
     name: 'birefnet',
-    displayName: 'BiRefNet',
+    displayName: 'BiRefNet_lite',
     url:
       process.env.NEXT_PUBLIC_BIREFNET_MODEL_URL ??
       'https://huggingface.co/studioludens/birefnet-lite-512/resolve/main/onnx/model_fp16.onnx',
@@ -77,4 +77,4 @@ export const MODEL_REGISTRY: Record<ModelName, ModelDescriptor> = {
   },
 }
 
-export const SEGMENTATION_MODELS: readonly SelectableSegmentationModelName[] = ['silueta', 'modnet']
+export const SEGMENTATION_MODELS: readonly SelectableSegmentationModelName[] = ['birefnet', 'silueta', 'modnet']
