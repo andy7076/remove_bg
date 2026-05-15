@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AI Cutout">
+  <defs>
+    <linearGradient id="bg" x1="10" x2="54" y1="8" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15181D"/>
+      <stop offset="1" stop-color="#0B0D10"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="19" x2="47" y1="15" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5EEAD4"/>
+      <stop offset="1" stop-color="#35C486"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <path fill="#23272F" d="M11 11h10v10H11zM31 11h10v10H31zM51 11h2a6 6 0 0 1 0 10h-2zM21 21h10v10H21zM41 21h10v10H41zM11 31h10v10H11zM31 31h10v10H31zM51 31h2v10h-2zM21 41h10v10H21zM41 41h10v10H41zM11 51h10v2a6 6 0 0 1-10 0zM31 51h10v2H31z"/>
+  <path fill="#F7FAFC" d="M19 19.5A4.5 4.5 0 0 1 23.5 15h17a4.5 4.5 0 0 1 4.5 4.5v25a4.5 4.5 0 0 1-4.5 4.5h-17a4.5 4.5 0 0 1-4.5-4.5z"/>
+  <path fill="#CFE6FF" d="M22 20a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14.5l-5.6-5.6a2 2 0 0 0-2.8 0l-3.9 3.9-1.5-1.5a2 2 0 0 0-2.8 0L22 34.7z"/>
+  <circle cx="37.5" cy="23.5" r="3.2" fill="#FFD166"/>
+  <path fill="url(#accent)" d="M26.5 46c.2-3.8 1.6-7.1 4.2-10a2.4 2.4 0 0 1 3.6 0c2.6 2.9 4 6.2 4.2 10z"/>
+  <path fill="#0B0D10" d="M16.7 16.1a2.5 2.5 0 0 1 3.5.2l27.5 31.5a2.5 2.5 0 0 1-3.8 3.3L16.5 19.6a2.5 2.5 0 0 1 .2-3.5z"/>
+  <path fill="url(#accent)" d="M17.5 14.9a3.2 3.2 0 0 1 4.5.3l27.5 31.5a3.2 3.2 0 0 1-4.8 4.2L17.2 19.4a3.2 3.2 0 0 1 .3-4.5zm2.3 2.7L47.3 49l.6-.5-27.5-31.5z"/>
+</svg>

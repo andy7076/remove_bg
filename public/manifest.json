@@ -6,6 +6,14 @@
   "display": "standalone",
   "background_color": "#0f1012",
   "theme_color": "#35c486",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
   "categories": ["photo", "productivity", "utilities"],
   "lang": "en"
 }

@@ -47,6 +47,15 @@ export const metadata: Metadata = {
     title: 'AI Background Remover Editor',
     description: 'Remove backgrounds locally with WebGPU AI and download transparent PNG cutouts.',
   },
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    shortcut: '/favicon.svg',
+  },
   robots: {
     index: true,
     follow: true,
