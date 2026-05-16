@@ -496,8 +496,16 @@ html[lang='en'] .upload-card {
   background: var(--panel);
 }
 
-.work-header div {
+.work-header > div:first-child {
   min-width: 0;
+}
+
+.work-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
 .work-header span {
@@ -520,11 +528,15 @@ html[lang='en'] .upload-card {
   min-height: 360px;
   overflow: hidden;
   background: var(--preview-bg);
+  overscroll-behavior: contain;
 }
 
 .pixi-stage {
   position: absolute;
   inset: 0;
+  overscroll-behavior: contain;
+  touch-action: none;
+  user-select: none;
   background-color: var(--checker-bg);
   background-image:
     linear-gradient(45deg, var(--checker-square) 25%, transparent 25%),
@@ -563,10 +575,10 @@ html[lang='en'] .upload-card {
   border-bottom: 1px solid var(--line-soft);
   background: var(--panel);
   display: grid;
-  grid-template-columns: auto auto minmax(120px, 1fr) auto auto auto;
+  grid-template-columns: auto minmax(160px, 1fr) auto auto auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 9px 14px;
 }
 
 .view-mode-switcher {
@@ -605,6 +617,10 @@ html[lang='en'] .upload-card {
   background: var(--control-bg);
 }
 
+.edit-tool-group[data-group='view'] {
+  gap: 2px;
+}
+
 .edit-tool-group button {
   width: 32px;
   min-height: 30px;
@@ -619,6 +635,15 @@ html[lang='en'] .upload-card {
 .edit-tool-group button:hover:not(:disabled) {
   background: var(--control-active);
   color: var(--text);
+}
+
+.zoom-value {
+  min-width: 48px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .edit-tool-group button[aria-label='添加'][data-active='true'],
@@ -1087,7 +1112,14 @@ html[lang='en'] .upload-card {
     padding: 14px;
   }
 
-  .work-header button {
+  .work-header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .work-header-actions > button[data-variant='primary'] {
     width: 100%;
   }
 
@@ -1099,8 +1131,8 @@ html[lang='en'] .upload-card {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
+    gap: 7px;
+    padding: 7px 8px;
   }
 
   .view-mode-switcher,
@@ -1110,7 +1142,6 @@ html[lang='en'] .upload-card {
   }
 
   .view-mode-switcher {
-    flex: 1 1 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1130,6 +1161,22 @@ html[lang='en'] .upload-card {
   .edit-tool-group button {
     width: 28px;
     min-height: 28px;
+  }
+
+  .edit-tool-group[data-group='paint'] {
+    flex: 1 1 auto;
+  }
+
+  .edit-tool-group[data-group='paint'] button {
+    flex: 1 1 0;
+  }
+
+  .edit-tool-group[data-group='view'] {
+    flex: 1 1 auto;
+  }
+
+  .zoom-value {
+    min-width: 42px;
   }
 
   .background-trigger {

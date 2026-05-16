@@ -1,6 +1,6 @@
 'use client'
 
-import type { CSSProperties, PointerEvent, WheelEvent } from 'react'
+import type { CSSProperties, PointerEvent } from 'react'
 import { useEffect, useRef } from 'react'
 import { Application, Graphics, Sprite, Texture } from 'pixi.js'
 import type { EditorTool, MaskBitmap, Point } from '@/types/editor'
@@ -168,6 +168,24 @@ export function EditorCanvas({
     observer.observe(host)
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host) {
+      return
+    }
+
+    host.addEventListener('wheel', handleNativeWheel, { passive: false })
+    host.addEventListener('gesturestart', blockViewportGesture, { passive: false })
+    host.addEventListener('gesturechange', blockViewportGesture, { passive: false })
+    host.addEventListener('gestureend', blockViewportGesture, { passive: false })
+    return () => {
+      host.removeEventListener('wheel', handleNativeWheel)
+      host.removeEventListener('gesturestart', blockViewportGesture)
+      host.removeEventListener('gesturechange', blockViewportGesture)
+      host.removeEventListener('gestureend', blockViewportGesture)
+    }
+  })
 
   useEffect(() => {
     if (!editable || !image || !mask) {
@@ -451,6 +469,9 @@ export function EditorCanvas({
   }
 
   function handlePointerDown(event: PointerEvent<HTMLCanvasElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+
     if (!image || (tool !== 'pan' && (!editable || !mask)) || (tool === 'pan' && !pannable)) {
       return
     }
@@ -474,6 +495,9 @@ export function EditorCanvas({
   }
 
   function handlePointerMove(event: PointerEvent<HTMLCanvasElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+
     if (!image || (!editable && !(tool === 'pan' && pannable))) {
       return
     }
@@ -495,12 +519,18 @@ export function EditorCanvas({
     }
   }
 
-  function handleWheel(event: WheelEvent<HTMLCanvasElement>) {
+  function blockViewportGesture(event: Event) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  function handleNativeWheel(event: globalThis.WheelEvent) {
+    event.preventDefault()
+    event.stopPropagation()
+
     if (!image || !onZoomChange) {
       return
     }
-
-    event.preventDefault()
 
     const host = hostRef.current
     if (!host) {
@@ -543,6 +573,9 @@ export function EditorCanvas({
   }
 
   function handlePointerUp(event: PointerEvent<HTMLCanvasElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+
     const interaction = interactionRef.current
     if (interaction.type === 'idle' || interaction.pointerId !== event.pointerId) {
       return
@@ -562,6 +595,9 @@ export function EditorCanvas({
   }
 
   function handleLostPointer(event: PointerEvent<HTMLCanvasElement>) {
+    event.preventDefault()
+    event.stopPropagation()
+
     handlePointerUp(event)
     cursorRef.current = null
   }
@@ -656,7 +692,6 @@ export function EditorCanvas({
         onPointerUp={handlePointerUp}
         onPointerCancel={handleLostPointer}
         onPointerLeave={handlePointerLeave}
-        onWheel={handleWheel}
       />
     </div>
   )

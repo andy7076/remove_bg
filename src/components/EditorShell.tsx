@@ -14,7 +14,6 @@ import {
   Hand,
   ImagePlus,
   LoaderCircle,
-  Minus,
   MousePointer2,
   Palette,
   Pencil,
@@ -26,6 +25,7 @@ import {
   Undo2,
   UploadCloud,
   ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import type { CSSProperties, ChangeEvent, DragEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -539,45 +539,46 @@ export function EditorShell() {
             <span>{previewTitle}</span>
             <strong>{originalImage ? fileName : copy.preview.placeholderTitle}</strong>
           </div>
-          <button type="button" data-variant="primary" onClick={handleExport} disabled={!canExport}>
-            <Download size={18} />
-            {copy.actions.download}
-          </button>
+          <div className="work-header-actions">
+            <div className="view-mode-switcher" role="group" aria-label={copy.edit.viewMode}>
+              <button
+                type="button"
+                aria-pressed={viewMode === 'preview'}
+                data-active={viewMode === 'preview'}
+                disabled={!originalImage}
+                onClick={() => {
+                  setViewMode('preview')
+                  setSelectedTool('pan')
+                }}
+                title={copy.edit.previewMode}
+              >
+                <Eye size={16} />
+                <span>{copy.edit.previewMode}</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={viewMode === 'edit'}
+                data-active={viewMode === 'edit'}
+                disabled={!originalImage || !mask || aiState.loading}
+                onClick={() => {
+                  setViewMode('edit')
+                  setSelectedTool('pan')
+                }}
+                title={copy.edit.editMode}
+              >
+                <Pencil size={16} />
+                <span>{copy.edit.editMode}</span>
+              </button>
+            </div>
+            <button type="button" data-variant="primary" onClick={handleExport} disabled={!canExport}>
+              <Download size={18} />
+              {copy.actions.download}
+            </button>
+          </div>
         </header>
 
         <div className="edit-toolbar" aria-label={copy.edit.label}>
-          <div className="view-mode-switcher" role="group" aria-label={copy.edit.viewMode}>
-            <button
-              type="button"
-              aria-pressed={viewMode === 'preview'}
-              data-active={viewMode === 'preview'}
-              disabled={!originalImage}
-              onClick={() => {
-                setViewMode('preview')
-                setSelectedTool('pan')
-              }}
-              title={copy.edit.previewMode}
-            >
-              <Eye size={16} />
-              <span>{copy.edit.previewMode}</span>
-            </button>
-            <button
-              type="button"
-              aria-pressed={viewMode === 'edit'}
-              data-active={viewMode === 'edit'}
-              disabled={!originalImage || !mask || aiState.loading}
-              onClick={() => {
-                setViewMode('edit')
-                setSelectedTool('pan')
-              }}
-              title={copy.edit.editMode}
-            >
-              <Pencil size={16} />
-              <span>{copy.edit.editMode}</span>
-            </button>
-          </div>
-
-          <div className="edit-tool-group">
+          <div className="edit-tool-group" data-group="paint">
             {EDIT_TOOLS.map((tool) => {
               const Icon = tool.icon
               const label = copy.edit[tool.id]
@@ -613,7 +614,7 @@ export function EditorShell() {
             <span>{brushSize}px</span>
           </label>
 
-          <div className="edit-tool-group">
+          <div className="edit-tool-group" data-group="history">
             <button
               type="button"
               aria-label={copy.edit.undo}
@@ -634,7 +635,7 @@ export function EditorShell() {
             </button>
           </div>
 
-          <div className="edit-tool-group">
+          <div className="edit-tool-group" data-group="view">
             <button
               type="button"
               aria-label={copy.edit.zoomOut}
@@ -642,8 +643,9 @@ export function EditorShell() {
               onClick={() => setZoom(Math.max(MIN_ZOOM, Number((zoom - 0.15).toFixed(2))))}
               title={copy.edit.zoomOut}
             >
-              <Minus size={16} />
+              <ZoomOut size={16} />
             </button>
+            <span className="zoom-value">{Math.round(zoom * 100)}%</span>
             <button
               type="button"
               aria-label={copy.edit.zoomIn}
