@@ -9,14 +9,12 @@ import {
   Cpu,
   Download,
   Eraser,
-  Eye,
   HardDriveDownload,
   Hand,
   ImagePlus,
   LoaderCircle,
   MousePointer2,
   Palette,
-  Pencil,
   Redo2,
   RefreshCw,
   RotateCcw,
@@ -66,9 +64,9 @@ const HISTORY_LIMIT = 40
 const MIN_ZOOM = 0.35
 const MAX_ZOOM = 4
 const EDIT_TOOLS: { id: EditTool; icon: typeof MousePointer2 }[] = [
+  { id: 'pan', icon: Hand },
   { id: 'restore', icon: Brush },
   { id: 'erase', icon: Eraser },
-  { id: 'pan', icon: Hand },
 ]
 const PREVIEW_BACKGROUNDS = [
   'transparent',
@@ -155,9 +153,10 @@ export function EditorShell() {
   }, [])
 
   const canExport = Boolean(originalImage && mask && stage === 'ready' && !aiState.loading)
-  const canEditMask = Boolean(viewMode === 'edit' && originalImage && mask && stage !== 'processing' && !aiState.loading)
+  const canUseMaskTool = Boolean(originalImage && mask && stage !== 'processing' && !aiState.loading)
+  const canEditMask = Boolean(viewMode === 'edit' && selectedTool !== 'pan' && canUseMaskTool)
   const canPanCanvas = Boolean(originalImage && stage !== 'processing' && !aiState.loading)
-  const brushControlDisabled = !canEditMask || selectedTool === 'pan'
+  const brushControlDisabled = !canEditMask
   const modelLabel = useMemo(() => MODEL_REGISTRY[selectedModel].displayName, [selectedModel])
   const selectedModelCopy = copy.models.options[selectedModel]
   const statusText = useMemo(() => formatStatus(copy, locale, statusState), [copy, locale, statusState])
@@ -414,6 +413,11 @@ export function EditorShell() {
     setModelMenuOpen(false)
   }
 
+  function handleToolSelect(tool: EditTool) {
+    setSelectedTool(tool)
+    setViewMode(tool === 'pan' ? 'preview' : 'edit')
+  }
+
   async function handleDrop(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
     setIsDragging(false)
@@ -540,35 +544,9 @@ export function EditorShell() {
             <strong>{originalImage ? fileName : copy.preview.placeholderTitle}</strong>
           </div>
           <div className="work-header-actions">
-            <div className="view-mode-switcher" role="group" aria-label={copy.edit.viewMode}>
-              <button
-                type="button"
-                aria-pressed={viewMode === 'preview'}
-                data-active={viewMode === 'preview'}
-                disabled={!originalImage}
-                onClick={() => {
-                  setViewMode('preview')
-                  setSelectedTool('pan')
-                }}
-                title={copy.edit.previewMode}
-              >
-                <Eye size={16} />
-                <span>{copy.edit.previewMode}</span>
-              </button>
-              <button
-                type="button"
-                aria-pressed={viewMode === 'edit'}
-                data-active={viewMode === 'edit'}
-                disabled={!originalImage || !mask || aiState.loading}
-                onClick={() => {
-                  setViewMode('edit')
-                  setSelectedTool('pan')
-                }}
-                title={copy.edit.editMode}
-              >
-                <Pencil size={16} />
-                <span>{copy.edit.editMode}</span>
-              </button>
+            <div className="mode-indicator" data-mode={viewMode} aria-label={copy.edit.viewMode}>
+              <span />
+              <strong>{viewMode === 'edit' ? copy.edit.editMode : copy.edit.previewMode}</strong>
             </div>
             <button type="button" data-variant="primary" onClick={handleExport} disabled={!canExport}>
               <Download size={18} />
@@ -589,9 +567,9 @@ export function EditorShell() {
                   aria-label={label}
                   aria-pressed={selectedTool === tool.id}
                   data-active={selectedTool === tool.id}
-                  disabled={tool.id === 'pan' ? !canPanCanvas : !canEditMask}
+                  disabled={tool.id === 'pan' ? !canPanCanvas : !canUseMaskTool}
                   key={tool.id}
-                  onClick={() => setSelectedTool(tool.id)}
+                  onClick={() => handleToolSelect(tool.id)}
                   title={label}
                 >
                   <Icon size={16} />

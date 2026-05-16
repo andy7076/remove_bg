@@ -581,30 +581,35 @@ html[lang='en'] .upload-card {
   padding: 9px 14px;
 }
 
-.view-mode-switcher {
+.mode-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 10px;
   border: 1px solid var(--line-soft);
   border-radius: 8px;
   background: var(--control-bg);
-}
-
-.view-mode-switcher button {
-  min-height: 30px;
-  padding: 0 9px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
   color: var(--muted);
   font-size: 12px;
 }
 
-.view-mode-switcher button[data-active='true'],
-.view-mode-switcher button:hover:not(:disabled) {
-  background: var(--control-active);
+.mode-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.mode-indicator strong {
   color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.mode-indicator[data-mode='edit'] span {
+  background: var(--accent);
 }
 
 .edit-tool-group {
@@ -1135,27 +1140,17 @@ html[lang='en'] .upload-card {
     padding: 7px 8px;
   }
 
-  .view-mode-switcher,
+  .mode-indicator,
   .edit-tool-group {
     gap: 2px;
     padding: 2px;
   }
 
-  .view-mode-switcher {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .view-mode-switcher button {
-    min-height: 28px;
+  .mode-indicator {
+    gap: 7px;
+    justify-content: center;
+    min-height: 32px;
     padding: 0 10px;
-    gap: 4px;
-  }
-
-  .view-mode-switcher button span {
-    max-width: none;
-    line-height: 1.05;
-    white-space: nowrap;
   }
 
   .edit-tool-group button {
