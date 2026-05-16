@@ -25,7 +25,7 @@ const initialState: EditorState = {
   brushSize: 36,
   brushHardness: 0.85,
   history: [],
-  selectedTool: 'erase',
+  selectedTool: 'pan',
   aiState: {
     loading: false,
     refining: false,

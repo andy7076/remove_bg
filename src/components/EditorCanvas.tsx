@@ -1,6 +1,6 @@
 'use client'
 
-import type { CSSProperties, PointerEvent } from 'react'
+import type { CSSProperties, PointerEvent, WheelEvent } from 'react'
 import { useEffect, useRef } from 'react'
 import { Application, Graphics, Sprite, Texture } from 'pixi.js'
 import type { EditorTool, MaskBitmap, Point } from '@/types/editor'
@@ -21,7 +21,12 @@ type EditorCanvasProps = {
   onMaskEditStart?: () => void
   onOffsetChange?: (offset: Point) => void
   onStroke?: (stroke: { x: number; y: number; radius: number; hardness: number; tool: EditorTool }) => void
+  onZoomChange?: (zoom: number) => void
 }
+
+const MIN_ZOOM = 0.35
+const MAX_ZOOM = 4
+const WHEEL_ZOOM_SPEED = 0.001
 
 export function EditorCanvas({
   image,
@@ -38,6 +43,7 @@ export function EditorCanvas({
   onMaskEditStart,
   onOffsetChange,
   onStroke,
+  onZoomChange,
 }: EditorCanvasProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const overlayRef = useRef<HTMLCanvasElement | null>(null)
@@ -489,6 +495,53 @@ export function EditorCanvas({
     }
   }
 
+  function handleWheel(event: WheelEvent<HTMLCanvasElement>) {
+    if (!image || !onZoomChange) {
+      return
+    }
+
+    event.preventDefault()
+
+    const host = hostRef.current
+    if (!host) {
+      return
+    }
+
+    const rect = host.getBoundingClientRect()
+    if (rect.width <= 0 || rect.height <= 0) {
+      return
+    }
+
+    const currentZoom = zoomRef.current
+    const wheelScale = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1
+    const nextZoom = clampZoom(currentZoom * Math.exp(-event.deltaY * wheelScale * WHEEL_ZOOM_SPEED))
+    if (nextZoom === currentZoom) {
+      return
+    }
+
+    const sourceWidth = image.width
+    const sourceHeight = image.height
+    const baseScale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight) * 0.88
+    const pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+    const currentCenter = {
+      x: rect.width / 2 + offsetRef.current.x,
+      y: rect.height / 2 + offsetRef.current.y,
+    }
+    const zoomRatio = nextZoom / currentZoom
+    const nextCenter = {
+      x: pointer.x - (pointer.x - currentCenter.x) * zoomRatio,
+      y: pointer.y - (pointer.y - currentCenter.y) * zoomRatio,
+    }
+
+    if (Number.isFinite(baseScale) && baseScale > 0) {
+      onOffsetChange?.({
+        x: nextCenter.x - rect.width / 2,
+        y: nextCenter.y - rect.height / 2,
+      })
+    }
+    onZoomChange(nextZoom)
+  }
+
   function handlePointerUp(event: PointerEvent<HTMLCanvasElement>) {
     const interaction = interactionRef.current
     if (interaction.type === 'idle' || interaction.pointerId !== event.pointerId) {
@@ -575,6 +628,10 @@ export function EditorCanvas({
     }
   }
 
+  function clampZoom(value: number) {
+    return Number(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value)).toFixed(3))
+  }
+
   function parseColor(value: string) {
     if (!value.startsWith('#')) {
       return 0xffffff
@@ -599,6 +656,7 @@ export function EditorCanvas({
         onPointerUp={handlePointerUp}
         onPointerCancel={handleLostPointer}
         onPointerLeave={handlePointerLeave}
+        onWheel={handleWheel}
       />
     </div>
   )

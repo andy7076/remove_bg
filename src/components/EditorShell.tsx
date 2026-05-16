@@ -63,6 +63,8 @@ type StatusState =
 
 const STEP_ORDER: ProcessStep[] = ['decode', 'model', 'inference', 'preview']
 const HISTORY_LIMIT = 40
+const MIN_ZOOM = 0.35
+const MAX_ZOOM = 4
 const EDIT_TOOLS: { id: EditTool; icon: typeof MousePointer2 }[] = [
   { id: 'restore', icon: Brush },
   { id: 'erase', icon: Eraser },
@@ -183,6 +185,7 @@ export function EditorShell() {
     setStatusState({ key: 'readingImage' })
     setFileName(file.name.replace(/\.[^.]+$/, '') || 'transparent-image')
     setViewMode('preview')
+    setSelectedTool('pan')
     resetHistory()
     resetLocalHistory()
     setZoom(1)
@@ -215,6 +218,7 @@ export function EditorShell() {
       setActiveStep(null)
       setStage('ready')
       setViewMode('preview')
+      setSelectedTool('pan')
       setStatusState({ key: 'done' })
       setErrorMessage('')
     } catch (error) {
@@ -231,6 +235,7 @@ export function EditorShell() {
 
     setStage('processing')
     setViewMode('preview')
+    setSelectedTool('pan')
     setCompletedSteps(['decode'])
     setDownloadProgress(null)
     setErrorMessage('')
@@ -547,7 +552,10 @@ export function EditorShell() {
               aria-pressed={viewMode === 'preview'}
               data-active={viewMode === 'preview'}
               disabled={!originalImage}
-              onClick={() => setViewMode('preview')}
+              onClick={() => {
+                setViewMode('preview')
+                setSelectedTool('pan')
+              }}
               title={copy.edit.previewMode}
             >
               <Eye size={16} />
@@ -558,7 +566,10 @@ export function EditorShell() {
               aria-pressed={viewMode === 'edit'}
               data-active={viewMode === 'edit'}
               disabled={!originalImage || !mask || aiState.loading}
-              onClick={() => setViewMode('edit')}
+              onClick={() => {
+                setViewMode('edit')
+                setSelectedTool('pan')
+              }}
               title={copy.edit.editMode}
             >
               <Pencil size={16} />
@@ -628,7 +639,7 @@ export function EditorShell() {
               type="button"
               aria-label={copy.edit.zoomOut}
               disabled={!originalImage}
-              onClick={() => setZoom(Math.max(0.35, Number((zoom - 0.15).toFixed(2))))}
+              onClick={() => setZoom(Math.max(MIN_ZOOM, Number((zoom - 0.15).toFixed(2))))}
               title={copy.edit.zoomOut}
             >
               <Minus size={16} />
@@ -637,7 +648,7 @@ export function EditorShell() {
               type="button"
               aria-label={copy.edit.zoomIn}
               disabled={!originalImage}
-              onClick={() => setZoom(Math.min(4, Number((zoom + 0.15).toFixed(2))))}
+              onClick={() => setZoom(Math.min(MAX_ZOOM, Number((zoom + 0.15).toFixed(2))))}
               title={copy.edit.zoomIn}
             >
               <ZoomIn size={16} />
@@ -714,6 +725,7 @@ export function EditorShell() {
             onMaskEditStart={handleMaskEditStart}
             onOffsetChange={setOffset}
             onStroke={handleCanvasStroke}
+            onZoomChange={setZoom}
           />
           {!originalImage && (
             <div className="preview-empty">
