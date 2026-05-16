@@ -234,7 +234,7 @@ export const MESSAGES: Record<Locale, Copy> = {
   zh: {
     brand: 'Bg Remover Editor',
     localeName: '中文',
-    introTitle: '本地 AI 抠图，图片不离开浏览器。',
+    introTitle: '本地 AI 抠图，图片不离开浏览器',
     introDescription:
       '上传图片后，模型会下载到本地缓存，并在 Web Worker 中使用 WebGPU 生成预览结果，确认后再下载透明 PNG。',
     upload: {

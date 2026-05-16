@@ -6,19 +6,15 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  Cpu,
   Download,
   Eraser,
-  HardDriveDownload,
   Hand,
-  ImagePlus,
   LoaderCircle,
   MousePointer2,
   Palette,
   Redo2,
   RefreshCw,
   RotateCcw,
-  ShieldCheck,
   Sparkles,
   Undo2,
   UploadCloud,
@@ -111,7 +107,6 @@ export function EditorShell() {
   const [completedSteps, setCompletedSteps] = useState<ProcessStep[]>([])
   const [statusState, setStatusState] = useState<StatusState>({ key: 'idle' })
   const [errorMessage, setErrorMessage] = useState('')
-  const [downloadProgress, setDownloadProgress] = useState<number | null>(null)
   const [fileName, setFileName] = useState('transparent-image')
   const [isDragging, setIsDragging] = useState(false)
   const [selectedModel, setSelectedModel] = useState<SelectableSegmentationModelName>('rmbg14')
@@ -161,6 +156,10 @@ export function EditorShell() {
   const selectedModelCopy = copy.models.options[selectedModel]
   const statusText = useMemo(() => formatStatus(copy, locale, statusState), [copy, locale, statusState])
   const stepItems = useMemo(() => buildStepItems(copy, completedSteps, activeStep, stage), [copy, completedSteps, activeStep, stage])
+  const backgroundTriggerStyle =
+    previewBackground === 'transparent'
+      ? undefined
+      : ({ '--selected-background': previewBackground } as CSSProperties)
   const previewTitle =
     stage === 'ready' ? copy.preview.readyTitle : stage === 'processing' ? copy.preview.processingTitle : copy.preview.waitingTitle
 
@@ -236,7 +235,6 @@ export function EditorShell() {
     setViewMode('preview')
     setSelectedTool('pan')
     setCompletedSteps(['decode'])
-    setDownloadProgress(null)
     setErrorMessage('')
     resetLocalHistory()
     setZoom(1)
@@ -318,7 +316,6 @@ export function EditorShell() {
   function handleSegmentationProgress(progress: SegmentationProgress) {
     if (progress.stage === 'inference') {
       markStepDone('model')
-      setDownloadProgress(null)
       setActiveStep('inference')
       setStatusState({ key: 'inferenceRunning' })
       return
@@ -327,13 +324,11 @@ export function EditorShell() {
     const modelProgress = progress.model
 
     if (modelProgress.phase === 'cache-hit') {
-      setDownloadProgress(100)
       setStatusState({ key: 'modelCacheHit' })
       return
     }
 
     if (modelProgress.phase === 'stored') {
-      setDownloadProgress(100)
       setStatusState({ key: 'modelStored' })
       return
     }
@@ -342,8 +337,6 @@ export function EditorShell() {
     const total = modelProgress.displayTotal ?? modelProgress.total
 
     if (total) {
-      const percent = Math.min(99, Math.round((loaded / total) * 100))
-      setDownloadProgress(percent)
       setStatusState({
         key: 'downloading',
         loaded,
@@ -352,7 +345,6 @@ export function EditorShell() {
       return
     }
 
-    setDownloadProgress(null)
     setStatusState({
       key: 'downloading',
       loaded,
@@ -378,7 +370,6 @@ export function EditorShell() {
 
   function resetProcessingState() {
     setErrorMessage('')
-    setDownloadProgress(null)
     setCompletedSteps([])
     setActiveStep(null)
     setMask(null)
@@ -443,7 +434,6 @@ export function EditorShell() {
 
         <div className="intro-copy">
           <h1>{copy.introTitle}</h1>
-          <p>{copy.introDescription}</p>
         </div>
 
         <div className="model-select" ref={modelMenuRef}>
@@ -510,28 +500,43 @@ export function EditorShell() {
           <span>{copy.upload.hint}</span>
         </label>
 
-        <div className="trust-grid">
-          <div>
-            <ShieldCheck size={18} />
-            <span>{copy.trust.noUpload}</span>
+        <div className="process-panel" data-tone={stage === 'error' ? 'error' : 'normal'}>
+          <div className="status-head">
+            <div>
+              <span>{copy.process.label}</span>
+              <strong>
+                {stage === 'ready'
+                  ? copy.process.ready
+                  : stage === 'error'
+                    ? copy.process.error
+                    : stage === 'processing'
+                      ? copy.process.running
+                      : copy.process.waiting}
+              </strong>
+            </div>
+            {stage === 'ready' && <CheckCircle2 size={20} />}
+            {stage === 'error' && <AlertCircle size={20} />}
+            {stage === 'processing' && <LoaderCircle className="spin" size={20} />}
           </div>
-          <div>
-            <Cpu size={18} />
-            <span>{copy.trust.webgpu}</span>
-          </div>
-          <div>
-            <HardDriveDownload size={18} />
-            <span>{copy.trust.cache}</span>
-          </div>
-        </div>
 
-        <div className="action-row">
-          <button type="button" data-variant="primary" onClick={() => fileInputRef.current?.click()} disabled={aiState.loading}>
-            <ImagePlus size={18} />
-            {copy.actions.chooseImage}
-          </button>
-          <button type="button" onClick={handleRetrySegmentation} disabled={!originalImage || aiState.loading}>
-            <RefreshCw size={17} />
+          <p className="status-message">{statusText}</p>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+          <div className="steps">
+            {stepItems.map((step) => (
+              <div className="step-item" data-state={step.state} key={step.id}>
+                <span className="step-dot">
+                  {step.state === 'done' && <CheckCircle2 size={13} />}
+                  {step.state === 'active' && <LoaderCircle className="spin" size={13} />}
+                  {step.state === 'error' && <AlertCircle size={13} />}
+                </span>
+                <strong>{step.label}</strong>
+              </div>
+            ))}
+          </div>
+
+          <button type="button" className="retry-button" onClick={handleRetrySegmentation} disabled={!originalImage || aiState.loading}>
+            <RefreshCw size={16} />
             {copy.actions.rerun}
           </button>
         </div>
@@ -651,14 +656,17 @@ export function EditorShell() {
             <button
               type="button"
               className="background-trigger"
-              aria-label={copy.edit.background}
+              aria-label={`${copy.edit.background}: ${copy.edit.backgroundOption(previewBackground)}`}
               aria-expanded={backgroundMenuOpen}
               aria-haspopup="dialog"
+              data-has-selection={previewBackground !== 'transparent'}
               disabled={!originalImage}
               onClick={() => setBackgroundMenuOpen((current) => !current)}
-              title={copy.edit.background}
+              style={backgroundTriggerStyle}
+              title={copy.edit.backgroundOption(previewBackground)}
             >
               <Palette size={16} />
+              <span className="background-trigger-indicator" aria-hidden="true" />
             </button>
             {backgroundMenuOpen && (
               <div className="background-popover">
@@ -722,56 +730,6 @@ export function EditorShell() {
           )}
         </div>
 
-        <div className="process-panel" data-tone={stage === 'error' ? 'error' : 'normal'}>
-          <div className="status-head">
-            <div>
-              <span>{copy.process.label}</span>
-              <strong>
-                {stage === 'ready'
-                  ? copy.process.ready
-                  : stage === 'error'
-                    ? copy.process.error
-                    : stage === 'processing'
-                      ? copy.process.running
-                      : copy.process.waiting}
-              </strong>
-            </div>
-            {stage === 'ready' && <CheckCircle2 size={22} />}
-            {stage === 'error' && <AlertCircle size={22} />}
-            {stage === 'processing' && <LoaderCircle className="spin" size={22} />}
-          </div>
-
-          <p className="status-message">{statusText}</p>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-          <div className="steps">
-            {stepItems.map((step) => (
-              <div className="step-item" data-state={step.state} key={step.id}>
-                <span className="step-dot">
-                  {step.state === 'done' && <CheckCircle2 size={15} />}
-                  {step.state === 'active' && <LoaderCircle className="spin" size={15} />}
-                  {step.state === 'error' && <AlertCircle size={15} />}
-                </span>
-                <span>
-                  <strong>{step.label}</strong>
-                  <small>{step.detail}</small>
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {activeStep === 'model' && (
-            <div className="progress-block">
-              <div className="progress-label">
-                <span>{copy.process.modelCache}</span>
-                <span>{downloadProgress === null ? '...' : `${downloadProgress}%`}</span>
-              </div>
-              <div className="progress-track">
-                <span style={{ width: `${downloadProgress ?? 38}%` }} />
-              </div>
-            </div>
-          )}
-        </div>
       </section>
     </main>
   )
