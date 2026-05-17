@@ -34,6 +34,7 @@ import { applyRegionEdit, type RegionEdit } from '@/editor/region/RegionMask'
 import { useLocale } from '@/i18n/LocaleProvider'
 import { MESSAGES, type Locale, type ModelOptionCopy } from '@/i18n/messages'
 import { EditorCanvas } from '@/components/EditorCanvas'
+import { BRUSH_SIZE_MAX, BRUSH_SIZE_MIN } from '@/settings/editorSettings'
 import { useEditorStore } from '@/store/editorStore'
 import type { MaskBitmap } from '@/types/editor'
 import { downloadBlob, exportTransparentPng } from '@/utils/exportPng'
@@ -609,11 +610,15 @@ export function EditorShell() {
             <span>{copy.edit.brushSize}</span>
             <input
               type="range"
-              min="6"
-              max="96"
+              min={BRUSH_SIZE_MIN}
+              max={BRUSH_SIZE_MAX}
               value={brushSize}
               disabled={brushControlDisabled}
-              style={{ '--brush-fill': `${((brushSize - 6) / 90) * 100}%` } as CSSProperties}
+              style={
+                {
+                  '--brush-fill': `${((brushSize - BRUSH_SIZE_MIN) / (BRUSH_SIZE_MAX - BRUSH_SIZE_MIN)) * 100}%`,
+                } as CSSProperties
+              }
               onChange={(event) => setBrushSize(Number(event.target.value))}
             />
             <span>{brushSize}px</span>

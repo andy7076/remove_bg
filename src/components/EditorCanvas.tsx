@@ -4,6 +4,7 @@ import type { CSSProperties, PointerEvent } from 'react'
 import { useEffect, useRef } from 'react'
 import { Application, Graphics, Sprite, Texture } from 'pixi.js'
 import type { EditorTool, MaskBitmap, Point } from '@/types/editor'
+import { DEFAULT_BRUSH_HARDNESS, DEFAULT_BRUSH_SIZE } from '@/settings/editorSettings'
 import { maskToImageData } from '@/utils/mask'
 
 type EditorCanvasProps = {
@@ -32,8 +33,8 @@ const WHEEL_ZOOM_SPEED = 0.001
 export function EditorCanvas({
   image,
   mask,
-  brushHardness = 0.85,
-  brushSize = 36,
+  brushHardness = DEFAULT_BRUSH_HARDNESS,
+  brushSize = DEFAULT_BRUSH_SIZE,
   editable = false,
   pannable = false,
   previewBackground = 'transparent',

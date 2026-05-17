@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { EditorState, EditorTool, MaskHistory, Point } from '@/types/editor'
+import { DEFAULT_BRUSH_HARDNESS, DEFAULT_BRUSH_SIZE } from '@/settings/editorSettings'
 import type { Texture } from 'pixi.js'
 
 type EditorActions = {
@@ -22,8 +23,8 @@ const initialState: EditorState = {
   previewTexture: null,
   zoom: 1,
   offset: { x: 0, y: 0 },
-  brushSize: 36,
-  brushHardness: 0.85,
+  brushSize: DEFAULT_BRUSH_SIZE,
+  brushHardness: DEFAULT_BRUSH_HARDNESS,
   history: [],
   selectedTool: 'pan',
   aiState: {
