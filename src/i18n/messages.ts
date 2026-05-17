@@ -263,19 +263,19 @@ export const MESSAGES: Record<Locale, Copy> = {
       options: {
         rmbg14: {
           name: 'RMBG-1.4',
-          bestFor: '通用抠图、批量图片处理。',
+          bestFor: '通用背景移除，适合商品、人物和常见图片。',
         },
         birefnet: {
           name: 'BiRefNet_lite',
-          bestFor: '轻量级通用抠图、实时处理。',
+          bestFor: '细节边缘更稳，适合发丝、毛绒和复杂轮廓。',
         },
         silueta: {
           name: 'Silueta',
-          bestFor: '快速人物分割、实时抠图。',
+          bestFor: '模型较轻，适合想更快得到预览的图片。',
         },
         modnet: {
           name: 'MODNet',
-          bestFor: '实时人像抠图、视频背景替换。',
+          bestFor: '偏人像抠图，适合半身照、头像和自拍。',
         },
       },
     },
