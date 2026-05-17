@@ -745,6 +745,13 @@ html[lang='en'] .upload-card {
   background: var(--control-active);
 }
 
+.background-trigger:disabled {
+  opacity: 1;
+  border-color: var(--line-soft);
+  background: var(--control-bg);
+  color: color-mix(in srgb, var(--muted) 48%, var(--panel-strong));
+}
+
 .background-trigger-indicator {
   position: absolute;
   right: 5px;
@@ -1130,7 +1137,7 @@ html[lang='en'] .upload-card {
   }
 
   .edit-tool-group[data-group='view'] {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
   }
 
   .zoom-value {
