@@ -34,8 +34,6 @@ export function applyBrush(mask: MaskBitmap, stroke: BrushStroke): MaskBitmap {
         next[index] = Math.max(next[index], Math.round(255 * falloff))
       } else if (stroke.tool === 'erase') {
         next[index] = Math.min(next[index], Math.round(255 * (1 - falloff)))
-      } else {
-        next[index] = Math.round(next[index] * (1 - falloff * 0.35) + 128 * falloff * 0.35)
       }
     }
   }

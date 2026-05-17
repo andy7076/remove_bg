@@ -618,11 +618,15 @@ html[lang='en'] .upload-card {
 }
 
 .edit-tool-group button[aria-label='添加'][data-active='true'],
+.edit-tool-group button[aria-label='区域添加'][data-active='true'],
+.edit-tool-group button[aria-label='Add area'][data-active='true'],
 .edit-tool-group button[aria-label='Add'][data-active='true'] {
   color: var(--accent);
 }
 
 .edit-tool-group button[aria-label='删除'][data-active='true'],
+.edit-tool-group button[aria-label='区域删除'][data-active='true'],
+.edit-tool-group button[aria-label='Remove area'][data-active='true'],
 .edit-tool-group button[aria-label='Remove'][data-active='true'] {
   color: var(--danger);
 }

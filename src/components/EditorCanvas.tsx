@@ -20,6 +20,7 @@ type EditorCanvasProps = {
   onMaskEditEnd?: () => void
   onMaskEditStart?: () => void
   onOffsetChange?: (offset: Point) => void
+  onRegionClick?: (edit: { x: number; y: number; mode: 'erase' | 'restore' }) => void
   onStroke?: (stroke: { x: number; y: number; radius: number; hardness: number; tool: EditorTool }) => void
   onZoomChange?: (zoom: number) => void
 }
@@ -42,6 +43,7 @@ export function EditorCanvas({
   onMaskEditEnd,
   onMaskEditStart,
   onOffsetChange,
+  onRegionClick,
   onStroke,
   onZoomChange,
 }: EditorCanvasProps) {
@@ -58,6 +60,7 @@ export function EditorCanvas({
   const interactionRef = useRef<
     | { type: 'idle' }
     | { type: 'paint'; pointerId: number }
+    | { type: 'region'; pointerId: number }
     | { type: 'pan'; pointerId: number; startX: number; startY: number; startOffset: Point }
   >({ type: 'idle' })
   const cursorRef = useRef<Point | null>(null)
@@ -446,7 +449,7 @@ export function EditorCanvas({
       }
     }
 
-    if (cursorRef.current && tool !== 'pan') {
+    if (cursorRef.current && isBrushTool(tool)) {
       const screen = imageToScreen(cursorRef.current, transform)
       context.beginPath()
       context.arc(screen.x, screen.y, brushRadiusForTool() * transform.scale, 0, Math.PI * 2)
@@ -486,6 +489,16 @@ export function EditorCanvas({
         startY: event.clientY,
         startOffset: offsetRef.current,
       }
+      return
+    }
+
+    if (isRegionTool(tool)) {
+      onMaskEditStart?.()
+      interactionRef.current = {
+        type: 'region',
+        pointerId: event.pointerId,
+      }
+      applyRegionClick(event)
       return
     }
 
@@ -581,7 +594,7 @@ export function EditorCanvas({
       return
     }
 
-    if (interaction.type === 'paint') {
+    if (interaction.type === 'paint' || interaction.type === 'region') {
       onMaskEditEnd?.()
     }
 
@@ -617,6 +630,19 @@ export function EditorCanvas({
     })
   }
 
+  function applyRegionClick(event: PointerEvent<HTMLCanvasElement>) {
+    const point = eventToImagePoint(event)
+    if (!point || !image || !isInsideImage(point)) {
+      return
+    }
+
+    onRegionClick?.({
+      x: point.x,
+      y: point.y,
+      mode: tool === 'regionRestore' ? 'restore' : 'erase',
+    })
+  }
+
   function eventToImagePoint(event: PointerEvent<HTMLCanvasElement>) {
     if (!image) {
       return null
@@ -637,6 +663,14 @@ export function EditorCanvas({
 
   function isInsideImage(point: Point) {
     return Boolean(image && point.x >= 0 && point.y >= 0 && point.x < image.width && point.y < image.height)
+  }
+
+  function isBrushTool(currentTool: EditorTool) {
+    return currentTool === 'restore' || currentTool === 'erase'
+  }
+
+  function isRegionTool(currentTool: EditorTool) {
+    return currentTool === 'regionRestore' || currentTool === 'regionErase'
   }
 
   function imageTransform(screenWidth: number, screenHeight: number, sourceWidth: number, sourceHeight: number) {

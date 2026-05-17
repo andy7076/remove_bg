@@ -6,6 +6,8 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  CircleMinus,
+  CirclePlus,
   Download,
   Eraser,
   Hand,
@@ -28,6 +30,7 @@ import { runSegmentationModel, type SegmentationProgress } from '@/ai/segmentati
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { applyBrush, type BrushStroke } from '@/editor/brush/BrushEngine'
+import { applyRegionEdit, type RegionEdit } from '@/editor/region/RegionMask'
 import { useLocale } from '@/i18n/LocaleProvider'
 import { MESSAGES, type Locale, type ModelOptionCopy } from '@/i18n/messages'
 import { EditorCanvas } from '@/components/EditorCanvas'
@@ -39,7 +42,7 @@ import { createOpaqueMask } from '@/utils/mask'
 type FlowStage = 'idle' | 'processing' | 'ready' | 'error'
 type ProcessStep = 'decode' | 'model' | 'inference' | 'preview'
 type StepState = 'pending' | 'active' | 'done' | 'error'
-type EditTool = 'restore' | 'erase' | 'pan'
+type EditTool = 'restore' | 'erase' | 'regionRestore' | 'regionErase' | 'pan'
 type ViewMode = 'preview' | 'edit'
 type StatusState =
   | { key: 'idle' }
@@ -63,6 +66,8 @@ const EDIT_TOOLS: { id: EditTool; icon: typeof MousePointer2 }[] = [
   { id: 'pan', icon: Hand },
   { id: 'restore', icon: Brush },
   { id: 'erase', icon: Eraser },
+  { id: 'regionRestore', icon: CirclePlus },
+  { id: 'regionErase', icon: CircleMinus },
 ]
 const PREVIEW_BACKGROUNDS = [
   'transparent',
@@ -85,6 +90,7 @@ export function EditorShell() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const modelMenuRef = useRef<HTMLDivElement | null>(null)
   const backgroundMenuRef = useRef<HTMLDivElement | null>(null)
+  const imageDataRef = useRef<ImageData | null>(null)
   const maskRef = useRef<MaskBitmap | null>(null)
   const pendingHistoryMaskRef = useRef<MaskBitmap | null>(null)
   const originalImage = useEditorStore((state) => state.originalImage)
@@ -151,7 +157,7 @@ export function EditorShell() {
   const canUseMaskTool = Boolean(originalImage && mask && stage !== 'processing' && !aiState.loading)
   const canEditMask = Boolean(viewMode === 'edit' && selectedTool !== 'pan' && canUseMaskTool)
   const canPanCanvas = Boolean(originalImage && stage !== 'processing' && !aiState.loading)
-  const brushControlDisabled = !canEditMask
+  const brushControlDisabled = !(canEditMask && isBrushTool(selectedTool))
   const modelLabel = useMemo(() => MODEL_REGISTRY[selectedModel].displayName, [selectedModel])
   const selectedModelCopy = copy.models.options[selectedModel]
   const statusText = useMemo(() => formatStatus(copy, locale, statusState), [copy, locale, statusState])
@@ -193,6 +199,7 @@ export function EditorShell() {
       const previewBitmap = await createImageBitmap(file)
       markStepDone('decode')
       setOriginalImage(previewBitmap)
+      imageDataRef.current = imageBitmapToImageData(previewBitmap)
       setMask(createOpaqueMask(previewBitmap.width, previewBitmap.height))
       await runSegmentation(previewBitmap)
     } catch (error) {
@@ -253,6 +260,20 @@ export function EditorShell() {
       maskRef.current = next
       return next
     })
+  }
+
+  function handleCanvasRegionClick(edit: RegionEdit) {
+    const current = maskRef.current
+    if (!current) {
+      return
+    }
+
+    const next = applyRegionEdit(current, {
+      ...edit,
+      imageData: imageDataRef.current,
+    })
+    maskRef.current = next
+    setMask(next)
   }
 
   function handleMaskEditStart() {
@@ -374,6 +395,7 @@ export function EditorShell() {
     setActiveStep(null)
     setMask(null)
     maskRef.current = null
+    imageDataRef.current = null
     resetLocalHistory()
     setStatusState({ key: 'idle' })
   }
@@ -712,6 +734,7 @@ export function EditorShell() {
             onMaskEditEnd={handleMaskEditEnd}
             onMaskEditStart={handleMaskEditStart}
             onOffsetChange={setOffset}
+            onRegionClick={handleCanvasRegionClick}
             onStroke={handleCanvasStroke}
             onZoomChange={setZoom}
           />
@@ -795,6 +818,23 @@ function formatStatus(copy: (typeof MESSAGES)[Locale], locale: Locale, state: St
     case 'error':
       return copy.status.error
   }
+}
+
+function isBrushTool(tool: EditTool) {
+  return tool === 'restore' || tool === 'erase'
+}
+
+function imageBitmapToImageData(image: ImageBitmap) {
+  const canvas = document.createElement('canvas')
+  canvas.width = image.width
+  canvas.height = image.height
+  const context = canvas.getContext('2d')
+  if (!context) {
+    return null
+  }
+
+  context.drawImage(image, 0, 0)
+  return context.getImageData(0, 0, image.width, image.height)
 }
 
 function formatBytes(bytes: number, formatter: Intl.NumberFormat) {

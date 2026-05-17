@@ -14,7 +14,7 @@ export type MaskHistory = {
   after: Uint8Array
 }
 
-export type EditorTool = 'erase' | 'restore' | 'feather' | 'pan'
+export type EditorTool = 'erase' | 'restore' | 'regionErase' | 'regionRestore' | 'pan'
 
 export type EditorState = {
   originalImage: ImageBitmap | null

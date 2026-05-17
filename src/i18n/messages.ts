@@ -56,6 +56,8 @@ type Copy = {
     livePreview: string
     restore: string
     erase: string
+    regionRestore: string
+    regionErase: string
     pan: string
     background: string
     backgroundOption: (value: string) => string
@@ -157,6 +159,8 @@ export const MESSAGES: Record<Locale, Copy> = {
       livePreview: 'Live preview',
       restore: 'Add',
       erase: 'Remove',
+      regionRestore: 'Add area',
+      regionErase: 'Remove area',
       pan: 'Drag',
       background: 'Preview background',
       backgroundOption: (value) => (value === 'transparent' ? 'Transparent background' : `Background ${value}`),
@@ -283,6 +287,8 @@ export const MESSAGES: Record<Locale, Copy> = {
       livePreview: '同步预览',
       restore: '添加',
       erase: '删除',
+      regionRestore: '区域添加',
+      regionErase: '区域删除',
       pan: '拖拽',
       background: '预览背景',
       backgroundOption: (value) => (value === 'transparent' ? '透明棋盘背景' : `背景色 ${value}`),
